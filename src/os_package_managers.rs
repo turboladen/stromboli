@@ -1,12 +1,13 @@
-#[cfg(target_os = "macos")]
 pub mod homebrew;
+
+pub use homebrew::Homebrew;
 
 use crate::{command_exists, logging::HasLogger, Error, Success};
 
 // nf-oct-package/f487 from https://www.nerdfonts.com/cheat-sheet.
 const ICON: char = '';
 
-pub(crate) trait OsPackageManager: HasLogger {
+pub trait OsPackageManager: HasLogger {
     const NAME: &'static str;
     const CMD: &'static str;
 

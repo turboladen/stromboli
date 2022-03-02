@@ -1,6 +1,7 @@
+pub mod apps;
 pub(crate) mod error;
 pub(crate) mod logging;
-pub(crate) mod os_package_managers;
+pub mod os_package_managers;
 
 pub use self::error::Error;
 
@@ -30,4 +31,6 @@ pub fn command_exists(the_command: &str) -> bool {
 pub enum Success {
     AlreadyInstalled,
     DidIt,
+    NothingToDo,
+    MoreToDo(String),
 }

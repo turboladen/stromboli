@@ -6,6 +6,9 @@ pub enum Error {
     #[error(transparent)]
     Utf8(#[from] std::str::Utf8Error),
 
+    #[error(transparent)]
+    Git(#[from] git2::Error),
+
     #[error("App/executable not installed: '{}'", _0)]
     NotInstalled(String),
 }
