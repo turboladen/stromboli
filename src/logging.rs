@@ -57,7 +57,7 @@ impl Logger {
 
     pub(crate) fn log_heading_group<F, O, E>(&self, f: F) -> Result<O, E>
     where
-        F: Fn() -> Result<O, E>,
+        F: FnOnce() -> Result<O, E>,
     {
         self.log_header();
         let o = f()?;
@@ -69,7 +69,7 @@ impl Logger {
     pub(crate) fn log_sub_heading_group<T, F, O, E>(&self, sub_name: T, f: F) -> Result<O, E>
     where
         T: AsRef<str>,
-        F: Fn() -> Result<O, E>,
+        F: FnOnce() -> Result<O, E>,
     {
         self.log_sub_header(sub_name);
         let o = f()?;

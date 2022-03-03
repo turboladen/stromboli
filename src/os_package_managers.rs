@@ -2,47 +2,47 @@ pub mod homebrew;
 
 pub use homebrew::Homebrew;
 
-use crate::{command_exists, logging::HasLogger, Error, Success};
+use crate::{logging::HasLogger, Error, Success};
+use std::ffi::OsStr;
 
 // nf-oct-package/f487 from https://www.nerdfonts.com/cheat-sheet.
 const ICON: char = '';
 
 pub trait OsPackageManager: HasLogger {
     const NAME: &'static str;
-    const CMD: &'static str;
 
-    /// Install the package manager.
+    /// Use the package manager to install a package.
     ///
-    fn install_itself(&self) -> Result<Success, Error>;
+    fn install_package<S>(&self, package_name: S) -> Result<Success, Error>
+    where
+        S: AsRef<OsStr>;
+
+    /// Use the package manager to install a list of packages.
+    ///
+    fn install_package_list<I, S>(&self, package_names: I) -> Result<Success, Error>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<OsStr>;
 
     /// Install all of the packages you want.
     ///
     fn install_all_packages(&self) -> Result<Success, Error>;
 
-    /// Check if the package manager is already installed, then install if it's not.
-    ///
-    fn check_and_install(&self) -> Result<Success, Error> {
-        self.logger().log_heading_group(|| {
-            if self.is_installed() {
-                self.logger().log_msg("Already installed.");
-                return Ok(Success::AlreadyInstalled);
-            }
-
-            self.install_itself_with_logging()
-        })
-    }
-
-    /// Is the package manager installed?
-    ///
-    fn is_installed(&self) -> bool {
-        command_exists(Self::CMD)
-    }
-
-    /// Wrapper around `install_itself()`, but adds log messages to the start & end of that call.
-    ///
-    fn install_itself_with_logging(&self) -> Result<Success, Error> {
+    fn install_package_with_logging<S>(&self, package_name: S) -> Result<Success, Error>
+    where
+        S: AsRef<OsStr>,
+    {
         self.logger()
-            .log_sub_heading_group("self-install", || self.install_itself())
+            .log_sub_heading_group("install-package", || self.install_package(package_name))
+    }
+
+    fn install_package_list_with_logging<I, S>(&self, package_names: I) -> Result<Success, Error>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<OsStr>,
+    {
+        self.logger()
+            .log_sub_heading_group("install-package", || self.install_package_list(package_names))
     }
 
     /// Wrapper around `install_all_packages()`, but adds log messages to the start & end of

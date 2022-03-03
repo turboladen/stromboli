@@ -1,9 +1,10 @@
 use super::OsPackageManager;
 use crate::{
+    command_exists,
     logging::{HasLogger, Logger},
-    Error, Success,
+    Bootstrap, Error, IsInstalled, Success,
 };
-use std::process::Command;
+use std::{ffi::OsStr, process::Command};
 
 pub struct Homebrew {
     logger: Logger,
@@ -23,13 +24,10 @@ impl HasLogger for Homebrew {
     }
 }
 
-impl OsPackageManager for Homebrew {
-    const NAME: &'static str = "homebrew";
-    const CMD: &'static str = "brew";
-
+impl Bootstrap for Homebrew {
     // `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
     //
-    fn install_itself(&self) -> Result<Success, Error> {
+    fn bootstrap(&self) -> Result<Success, Error> {
         let output = Command::new("curl")
             .arg("-fsSL")
             .arg("https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh")
@@ -42,6 +40,18 @@ impl OsPackageManager for Homebrew {
 
         Ok(Success::DidIt)
     }
+}
+
+impl IsInstalled for Homebrew {
+    /// Is the package manager installed?
+    ///
+    fn is_installed(&self) -> bool {
+        command_exists("brew")
+    }
+}
+
+impl OsPackageManager for Homebrew {
+    const NAME: &'static str = "homebrew";
 
     // brew bundle --global
     //
@@ -49,6 +59,33 @@ impl OsPackageManager for Homebrew {
         Command::new("brew")
             .arg("bundle")
             .arg("--global")
+            .output()?;
+
+        Ok(Success::DidIt)
+    }
+
+    fn install_package<S>(&self, package_name: S) -> Result<Success, Error>
+    where
+        S: AsRef<OsStr>,
+    {
+        Command::new("brew")
+            .arg("install")
+            .arg(package_name)
+            .output()?;
+
+        Ok(Success::DidIt)
+    }
+
+    fn install_package_list<I, S>(&self, package_names: I) -> Result<Success, Error>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<OsStr>,
+    {
+        Command::new("brew")
+            .arg("install")
+            .args(
+                package_names
+            )
             .output()?;
 
         Ok(Success::DidIt)

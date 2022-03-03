@@ -1,64 +1,27 @@
-use super::{App, AppPluginManager};
+use super::PluginManager;
 use crate::{
     logging::{HasLogger, Logger},
-    Error, Success,
+    Bootstrap, Error, IsInstalled, Success,
 };
 use git2::Repository;
-use std::{path::PathBuf, process::Command, rc::Rc};
+use std::{path::PathBuf, process::Command};
 
-const ICON: char = '';
+// https://www.nerdfonts.com/cheat-sheet: nf-dev-terminal_badge
+const ICON: char = '';
 
-pub struct Tmux {
-    logger: Rc<Logger>,
-    tpm: Tpm,
+pub struct Tpm {
+    logger: Logger,
 }
 
-impl Default for Tmux {
+impl Default for Tpm {
     fn default() -> Self {
-        let logger = Rc::new(Logger::new(ICON, "tmux"));
         Self {
-            tpm: Tpm::new(Rc::clone(&logger)),
-            logger,
+            logger: Logger::new(ICON, "tpm"),
         }
     }
 }
 
-impl HasLogger for Tmux {
-    fn logger(&self) -> &Logger {
-        &self.logger
-    }
-}
-
-impl App for Tmux {
-    const CMD: &'static str = "tmux";
-    type PluginManager = Tpm;
-
-    fn check_and_install(&self) -> Result<Success, Error> {
-        self.logger().log_heading_group(|| {
-            if !self.is_installed() {
-                return Err(Error::NotInstalled("`tmux` not installed!".to_string()));
-            }
-
-            Ok(Success::AlreadyInstalled)
-            // Self::install_plugin_manager()?;
-            // Self::install_plugins()
-        })
-    }
-
-    fn plugin_manager(&self) -> &Self::PluginManager {
-        &self.tpm
-    }
-}
-
-pub struct Tpm {
-    logger: Rc<Logger>,
-}
-
 impl Tpm {
-    pub fn new(logger: Rc<Logger>) -> Self {
-        Self { logger }
-    }
-
     pub fn source_repository() -> &'static str {
         "https://github.com/tmux-plugins/tpm"
     }
@@ -78,14 +41,14 @@ impl HasLogger for Tpm {
     }
 }
 
-impl AppPluginManager for Tpm {
-    const NAME: &'static str = "tpm";
-
+impl IsInstalled for Tpm {
     fn is_installed(&self) -> bool {
         Self::root_dir().exists() && Self::config_file_path().exists()
     }
+}
 
-    fn install_itself(&self) -> Result<Success, Error> {
+impl Bootstrap for Tpm {
+    fn bootstrap(&self) -> Result<Success, Error> {
         self.logger().log_sub_heading_group("tpm-install", || {
             let tpm_root_dir = Self::root_dir();
 
@@ -101,6 +64,10 @@ impl AppPluginManager for Tpm {
             Ok(Success::MoreToDo(msg.to_string()))
         })
     }
+}
+
+impl PluginManager for Tpm {
+    const NAME: &'static str = "tpm";
 
     /// https://github.com/tmux-plugins/tpm/blob/master/docs/managing_plugins_via_cmd_line.mod
     ///
