@@ -1,7 +1,7 @@
 use super::PluginManager;
 use crate::{
     logging::{HasLogger, Logger},
-    Bootstrap, Error, IsInstalled, Success,
+    Bootstrap, Error, IdempotentBootstrap, IsInstalled, Success,
 };
 use git2::Repository;
 use std::{path::PathBuf, process::Command};
@@ -65,6 +65,8 @@ impl Bootstrap for Tpm {
         })
     }
 }
+
+impl IdempotentBootstrap for Tpm {}
 
 impl PluginManager for Tpm {
     const NAME: &'static str = "tpm";

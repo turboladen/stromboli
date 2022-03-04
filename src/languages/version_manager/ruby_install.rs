@@ -1,7 +1,7 @@
-use super::LanguageVersionManager;
+use super::VersionManager;
 use crate::{
     logging::{HasLogger, Logger},
-    Bootstrap, Error, Success,
+    Bootstrap, Error, IdempotentBootstrap, IsInstalled, Success,
 };
 use std::{ffi::OsStr, process::Command};
 
@@ -26,45 +26,56 @@ impl HasLogger for RubyInstall {
     }
 }
 
+impl IsInstalled for RubyInstall {
+    fn is_installed(&self) -> bool {
+        crate::command_exists("ruby-install")
+    }
+}
+
 impl Bootstrap for RubyInstall {
     fn bootstrap(&self) -> Result<Success, Error> {
-        let _ = Command::new("wget")
+        let mut child = Command::new("wget")
             .arg("-0")
             .arg("ruby-install-0.8.3.tar.gz")
             .arg("https://github.com/postmodern/ruby-install/archive/v0.8.3.tar.gz")
-            .output()?;
+            .spawn()?;
+        child.wait()?;
 
-        let _ = Command::new("tar")
+        let mut child = Command::new("tar")
             .arg("-xzvf")
             .arg("ruby-install-0.8.3.tar.gz")
-            .output()?;
+            .spawn()?;
+        child.wait()?;
 
-        let _ = Command::new("tar")
+        let mut child = Command::new("tar")
             .arg("-xzvf")
             .arg("ruby-install-0.8.3.tar.gz")
-            .output()?;
+            .spawn()?;
+        child.wait()?;
 
-        let _ = Command::new("sudo")
+        let mut child = Command::new("sudo")
             .current_dir("ruby-install-0.8.3")
             .arg("make")
             .arg("install")
-            .output()?;
+            .spawn()?;
+        child.wait()?;
 
         Ok(Success::DidIt)
     }
 }
 
-impl LanguageVersionManager for RubyInstall {
+impl IdempotentBootstrap for RubyInstall {}
+
+impl VersionManager for RubyInstall {
     const NAME: &'static str = "ruby-install";
 
-    fn install_language_version<I, S>(args: I) -> Result<Success, Error>
+    fn install_language_version<I, S>(&self, args: I) -> Result<Success, Error>
     where
         I: IntoIterator<Item = S>,
         S: AsRef<OsStr>,
     {
-        let _ = Command::new("ruby-install")
-            .args(args)
-            .output()?;
+        let mut child = Command::new("ruby-install").args(args).spawn()?;
+        child.wait()?;
 
         Ok(Success::DidIt)
     }

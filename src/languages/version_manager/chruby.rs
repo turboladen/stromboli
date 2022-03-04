@@ -1,6 +1,6 @@
 use crate::{
     logging::{HasLogger, Logger},
-    Bootstrap, Success,
+    Bootstrap, IdempotentBootstrap, Success, IsInstalled,
 };
 use std::process::Command;
 
@@ -25,30 +25,42 @@ impl HasLogger for Chruby {
     }
 }
 
+impl IsInstalled for Chruby {
+    fn is_installed(&self) -> bool {
+        crate::command_exists("chruby")
+    }
+}
+
 impl Bootstrap for Chruby {
     fn bootstrap(&self) -> Result<crate::Success, crate::Error> {
-        let _ = Command::new("wget")
+        let mut child = Command::new("wget")
             .arg("-0")
             .arg("chruby-0.3.9.tar.gz")
             .arg("https://github.com/postmodern/chruby/archive/v0.3.9.tar.gz")
-            .output()?;
+            .spawn()?;
+        child.wait()?;
 
-        let _ = Command::new("tar")
+        let mut child = Command::new("tar")
             .arg("-xzvf")
             .arg("chruby-0.3.9.tar.gz")
-            .output()?;
+            .spawn()?;
+        child.wait()?;
 
-        let _ = Command::new("tar")
+        let mut child = Command::new("tar")
             .arg("-xzvf")
             .arg("chruby-0.3.9.tar.gz")
-            .output()?;
+            .spawn()?;
+        child.wait()?;
 
-        let _ = Command::new("sudo")
+        let mut child = Command::new("sudo")
             .current_dir("chruby-0.3.9")
             .arg("make")
             .arg("install")
-            .output()?;
+            .spawn()?;
+        child.wait()?;
 
         Ok(Success::DidIt)
     }
 }
+
+impl IdempotentBootstrap for Chruby {}

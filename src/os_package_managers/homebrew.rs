@@ -1,8 +1,7 @@
 use super::OsPackageManager;
 use crate::{
-    command_exists,
     logging::{HasLogger, Logger},
-    Bootstrap, Error, IsInstalled, Success,
+    Bootstrap, Error, IdempotentBootstrap, IsInstalled, Success,
 };
 use std::{ffi::OsStr, process::Command};
 
@@ -42,11 +41,13 @@ impl Bootstrap for Homebrew {
     }
 }
 
+impl IdempotentBootstrap for Homebrew {}
+
 impl IsInstalled for Homebrew {
     /// Is the package manager installed?
     ///
     fn is_installed(&self) -> bool {
-        command_exists("brew")
+        crate::command_exists("brew")
     }
 }
 
@@ -56,10 +57,8 @@ impl OsPackageManager for Homebrew {
     // brew bundle --global
     //
     fn install_all_packages(&self) -> Result<Success, Error> {
-        Command::new("brew")
-            .arg("bundle")
-            .arg("--global")
-            .output()?;
+        let mut child = Command::new("brew").arg("bundle").arg("--global").spawn()?;
+        child.wait()?;
 
         Ok(Success::DidIt)
     }
@@ -68,10 +67,11 @@ impl OsPackageManager for Homebrew {
     where
         S: AsRef<OsStr>,
     {
-        Command::new("brew")
+        let mut child = Command::new("brew")
             .arg("install")
             .arg(package_name)
-            .output()?;
+            .spawn()?;
+        child.wait()?;
 
         Ok(Success::DidIt)
     }
@@ -81,12 +81,11 @@ impl OsPackageManager for Homebrew {
         I: IntoIterator<Item = S>,
         S: AsRef<OsStr>,
     {
-        Command::new("brew")
+        let mut child = Command::new("brew")
             .arg("install")
-            .args(
-                package_names
-            )
-            .output()?;
+            .args(package_names)
+            .spawn()?;
+        child.wait()?;
 
         Ok(Success::DidIt)
     }

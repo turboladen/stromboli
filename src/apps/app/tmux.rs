@@ -1,7 +1,7 @@
 use super::App;
 use crate::{
     logging::{HasLogger, Logger},
-    IsInstalled,
+    IsInstalled, NewPluginManager, apps::plugin_manager::tpm::Tpm,
 };
 
 // https://www.nerdfonts.com/cheat-sheet: nf-dev-terminal
@@ -28,6 +28,15 @@ impl HasLogger for Tmux {
 impl IsInstalled for Tmux {
     fn is_installed(&self) -> bool {
         crate::command_exists("tmux")
+    }
+}
+
+impl NewPluginManager for Tmux {
+    type PluginManager = Tpm;
+
+
+    fn new_plugin_manager(&self) -> Self::PluginManager {
+        Tpm::default()
     }
 }
 

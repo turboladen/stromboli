@@ -1,2 +1,2 @@
-pub(crate) mod app;
-pub(crate) mod plugin_manager;
+pub mod app;
+pub mod plugin_manager;

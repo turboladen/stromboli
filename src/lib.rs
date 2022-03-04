@@ -1,8 +1,9 @@
 pub mod apps;
-pub(crate) mod error;
-pub(crate) mod languages;
-pub(crate) mod logging;
+pub mod languages;
 pub mod os_package_managers;
+
+pub(crate) mod error;
+pub(crate) mod logging;
 
 pub use self::error::Error;
 
@@ -54,8 +55,14 @@ pub trait IsInstalled {
     fn is_installed(&self) -> bool;
 }
 
-pub trait IdempotentBootstrap: IsInstalled {
-    fn idempotent_bootstrap(&self) -> Result<Success, crate::Error>;
+pub trait IdempotentBootstrap: IsInstalled + Bootstrap {
+    fn idempotent_bootstrap(&self) -> Result<Success, crate::Error> {
+        if self.is_installed() {
+            return Ok(Success::AlreadyInstalled);
+        }
+
+        self.bootstrap()
+    }
 }
 
 pub trait IdempotentBootstrapWithLogging: IdempotentBootstrap + logging::HasLogger {
@@ -69,4 +76,12 @@ pub trait IdempotentBootstrapWithLogging: IdempotentBootstrap + logging::HasLogg
             self.idempotent_bootstrap()
         })
     }
+}
+
+impl<T> IdempotentBootstrapWithLogging for T where T: IdempotentBootstrap + logging::HasLogger {}
+
+pub trait NewPluginManager {
+    type PluginManager;
+
+    fn new_plugin_manager(&self) -> Self::PluginManager;
 }
