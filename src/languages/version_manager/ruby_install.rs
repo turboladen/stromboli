@@ -1,7 +1,8 @@
 use super::VersionManager;
 use crate::{
+    install::{IdempotentInstall, Install, IsInstalled, RemoteShellScript},
     logging::{HasLogger, Logger},
-    Error, install::{IdempotentInstall, Install, IsInstalled}, Success,
+    Error, Success,
 };
 use std::{ffi::OsStr, process::Command};
 
@@ -32,7 +33,7 @@ impl IsInstalled for RubyInstall {
     }
 }
 
-impl Install for RubyInstall {
+impl Install<RemoteShellScript> for RubyInstall {
     fn install(&self) -> Result<Success, Error> {
         let mut child = Command::new("wget")
             .arg("-0")
@@ -64,7 +65,7 @@ impl Install for RubyInstall {
     }
 }
 
-impl IdempotentInstall for RubyInstall {}
+impl IdempotentInstall<RemoteShellScript> for RubyInstall {}
 
 impl VersionManager for RubyInstall {
     const NAME: &'static str = "ruby-install";

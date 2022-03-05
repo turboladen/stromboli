@@ -1,6 +1,7 @@
 use crate::{
+    install::{IdempotentInstall, Install, IsInstalled, RemoteShellScript},
     logging::{HasLogger, Logger},
-    install::{IdempotentInstall, Install, IsInstalled}, Success,
+    Success,
 };
 use std::process::Command;
 
@@ -31,7 +32,7 @@ impl IsInstalled for Chruby {
     }
 }
 
-impl Install for Chruby {
+impl Install<RemoteShellScript> for Chruby {
     fn install(&self) -> Result<crate::Success, crate::Error> {
         let mut child = Command::new("wget")
             .arg("-0")
@@ -63,4 +64,4 @@ impl Install for Chruby {
     }
 }
 
-impl IdempotentInstall for Chruby {}
+impl IdempotentInstall<RemoteShellScript> for Chruby {}

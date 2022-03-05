@@ -1,7 +1,8 @@
 use super::OsPackageManager;
 use crate::{
+    install::{IdempotentInstall, Install, IsInstalled, RemoteShellScript},
     logging::{HasLogger, Logger},
-    Error, install::{IdempotentInstall, Install, IsInstalled}, Success,
+    Error, Success,
 };
 use std::{ffi::OsStr, process::Command};
 
@@ -23,7 +24,7 @@ impl HasLogger for Homebrew {
     }
 }
 
-impl Install for Homebrew {
+impl Install<RemoteShellScript> for Homebrew {
     // `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
     //
     fn install(&self) -> Result<Success, Error> {
@@ -41,7 +42,7 @@ impl Install for Homebrew {
     }
 }
 
-impl IdempotentInstall for Homebrew {}
+impl IdempotentInstall<RemoteShellScript> for Homebrew {}
 
 impl IsInstalled for Homebrew {
     /// Is the package manager installed?
