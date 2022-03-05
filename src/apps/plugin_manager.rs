@@ -1,5 +1,7 @@
 pub(crate) mod tpm;
 
+pub use tpm::Tpm;
+
 pub trait PluginManager {
     const NAME: &'static str;
 

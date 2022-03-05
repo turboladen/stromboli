@@ -1,5 +1,5 @@
 use super::Language;
-use crate::{logging::{HasLogger, Logger}, IsInstalled};
+use crate::{logging::{HasLogger, Logger}, install::IsInstalled};
 
 // https://www.nerdfonts.com/cheat-sheet: nf-seti-ruby
 pub const ICON: char = '';

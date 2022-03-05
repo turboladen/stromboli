@@ -1,11 +1,13 @@
 pub mod apps;
+pub mod install;
 pub mod languages;
+pub(crate) mod logging;
 pub mod os_package_managers;
 
 pub(crate) mod error;
-pub(crate) mod logging;
 
-pub use self::error::Error;
+pub use self::{error::Error, logging::Logger};
+pub use dirs;
 
 use std::process::{Command, Stdio};
 
@@ -36,49 +38,6 @@ pub enum Success {
     NothingToDo,
     MoreToDo(String),
 }
-
-pub trait Bootstrap {
-    fn bootstrap(&self) -> Result<Success, crate::Error>;
-}
-
-pub trait BootstrapWithLogging: Bootstrap + logging::HasLogger {
-    /// Wrapper around `bootstrap()`, but adds log messages to the start & end of that call.
-    ///
-    fn bootstrap_with_logging(&self) -> Result<Success, crate::Error> {
-        self.logger().log_heading_group(|| self.bootstrap())
-    }
-}
-
-impl<T> BootstrapWithLogging for T where T: Bootstrap + logging::HasLogger {}
-
-pub trait IsInstalled {
-    fn is_installed(&self) -> bool;
-}
-
-pub trait IdempotentBootstrap: IsInstalled + Bootstrap {
-    fn idempotent_bootstrap(&self) -> Result<Success, crate::Error> {
-        if self.is_installed() {
-            return Ok(Success::AlreadyInstalled);
-        }
-
-        self.bootstrap()
-    }
-}
-
-pub trait IdempotentBootstrapWithLogging: IdempotentBootstrap + logging::HasLogger {
-    fn idempotent_bootstrap_with_logging(&self) -> Result<Success, crate::Error> {
-        self.logger().log_heading_group(|| {
-            if self.is_installed() {
-                self.logger().log_msg("Already installed.");
-                return Ok(Success::AlreadyInstalled);
-            }
-
-            self.idempotent_bootstrap()
-        })
-    }
-}
-
-impl<T> IdempotentBootstrapWithLogging for T where T: IdempotentBootstrap + logging::HasLogger {}
 
 pub trait NewPluginManager {
     type PluginManager;

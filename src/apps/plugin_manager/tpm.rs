@@ -1,7 +1,7 @@
 use super::PluginManager;
 use crate::{
     logging::{HasLogger, Logger},
-    Bootstrap, Error, IdempotentBootstrap, IsInstalled, Success,
+    Error, install::{IdempotentInstall, Install, IsInstalled}, Success,
 };
 use git2::Repository;
 use std::{path::PathBuf, process::Command};
@@ -47,8 +47,8 @@ impl IsInstalled for Tpm {
     }
 }
 
-impl Bootstrap for Tpm {
-    fn bootstrap(&self) -> Result<Success, Error> {
+impl Install for Tpm {
+    fn install(&self) -> Result<Success, Error> {
         self.logger().log_sub_heading_group("tpm-install", || {
             let tpm_root_dir = Self::root_dir();
 
@@ -66,7 +66,7 @@ impl Bootstrap for Tpm {
     }
 }
 
-impl IdempotentBootstrap for Tpm {}
+impl IdempotentInstall for Tpm {}
 
 impl PluginManager for Tpm {
     const NAME: &'static str = "tpm";

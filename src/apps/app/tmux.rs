@@ -1,7 +1,9 @@
 use super::App;
 use crate::{
+    apps::plugin_manager::Tpm,
+    install::IsInstalled,
     logging::{HasLogger, Logger},
-    IsInstalled, NewPluginManager, apps::plugin_manager::tpm::Tpm,
+    NewPluginManager,
 };
 
 // https://www.nerdfonts.com/cheat-sheet: nf-dev-terminal
@@ -33,7 +35,6 @@ impl IsInstalled for Tmux {
 
 impl NewPluginManager for Tmux {
     type PluginManager = Tpm;
-
 
     fn new_plugin_manager(&self) -> Self::PluginManager {
         Tpm::default()

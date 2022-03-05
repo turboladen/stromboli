@@ -1,7 +1,7 @@
 use super::OsPackageManager;
 use crate::{
     logging::{HasLogger, Logger},
-    Bootstrap, Error, IdempotentBootstrap, IsInstalled, Success,
+    Error, install::{IdempotentInstall, Install, IsInstalled}, Success,
 };
 use std::{ffi::OsStr, process::Command};
 
@@ -23,10 +23,10 @@ impl HasLogger for Homebrew {
     }
 }
 
-impl Bootstrap for Homebrew {
+impl Install for Homebrew {
     // `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
     //
-    fn bootstrap(&self) -> Result<Success, Error> {
+    fn install(&self) -> Result<Success, Error> {
         let output = Command::new("curl")
             .arg("-fsSL")
             .arg("https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh")
@@ -41,7 +41,7 @@ impl Bootstrap for Homebrew {
     }
 }
 
-impl IdempotentBootstrap for Homebrew {}
+impl IdempotentInstall for Homebrew {}
 
 impl IsInstalled for Homebrew {
     /// Is the package manager installed?

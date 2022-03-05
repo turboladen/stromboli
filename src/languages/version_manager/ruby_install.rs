@@ -1,7 +1,7 @@
 use super::VersionManager;
 use crate::{
     logging::{HasLogger, Logger},
-    Bootstrap, Error, IdempotentBootstrap, IsInstalled, Success,
+    Error, install::{IdempotentInstall, Install, IsInstalled}, Success,
 };
 use std::{ffi::OsStr, process::Command};
 
@@ -32,8 +32,8 @@ impl IsInstalled for RubyInstall {
     }
 }
 
-impl Bootstrap for RubyInstall {
-    fn bootstrap(&self) -> Result<Success, Error> {
+impl Install for RubyInstall {
+    fn install(&self) -> Result<Success, Error> {
         let mut child = Command::new("wget")
             .arg("-0")
             .arg("ruby-install-0.8.3.tar.gz")
@@ -64,7 +64,7 @@ impl Bootstrap for RubyInstall {
     }
 }
 
-impl IdempotentBootstrap for RubyInstall {}
+impl IdempotentInstall for RubyInstall {}
 
 impl VersionManager for RubyInstall {
     const NAME: &'static str = "ruby-install";

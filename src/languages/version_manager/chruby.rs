@@ -1,6 +1,6 @@
 use crate::{
     logging::{HasLogger, Logger},
-    Bootstrap, IdempotentBootstrap, Success, IsInstalled,
+    install::{IdempotentInstall, Install, IsInstalled}, Success,
 };
 use std::process::Command;
 
@@ -31,8 +31,8 @@ impl IsInstalled for Chruby {
     }
 }
 
-impl Bootstrap for Chruby {
-    fn bootstrap(&self) -> Result<crate::Success, crate::Error> {
+impl Install for Chruby {
+    fn install(&self) -> Result<crate::Success, crate::Error> {
         let mut child = Command::new("wget")
             .arg("-0")
             .arg("chruby-0.3.9.tar.gz")
@@ -63,4 +63,4 @@ impl Bootstrap for Chruby {
     }
 }
 
-impl IdempotentBootstrap for Chruby {}
+impl IdempotentInstall for Chruby {}
