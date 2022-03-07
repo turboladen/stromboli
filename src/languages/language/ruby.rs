@@ -1,9 +1,13 @@
 use super::Language;
-use crate::{logging::{HasLogger, Logger}, install::IsInstalled};
+use crate::{
+    install::IsInstalled,
+    logging::{HasLogger, Logger},
+};
 
 // https://www.nerdfonts.com/cheat-sheet: nf-seti-ruby
 pub const ICON: char = '';
 
+#[derive(Debug, Clone, Copy)]
 pub struct Ruby {
     logger: Logger,
 }

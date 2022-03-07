@@ -1,5 +1,5 @@
-pub(crate) mod chruby;
-pub(crate) mod ruby_install;
+pub mod chruby;
+pub mod ruby_install;
 
 pub use self::{chruby::Chruby, ruby_install::RubyInstall};
 

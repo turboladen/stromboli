@@ -1,4 +1,4 @@
-use colored::*;
+use colored::Colorize;
 use std::fmt::Display;
 
 pub trait HasLogger {
@@ -12,7 +12,8 @@ pub struct Logger {
 }
 
 impl Logger {
-    pub fn new(icon: char, subject_name: &'static str) -> Self {
+    #[must_use]
+    pub const fn new(icon: char, subject_name: &'static str) -> Self {
         Self { icon, subject_name }
     }
 

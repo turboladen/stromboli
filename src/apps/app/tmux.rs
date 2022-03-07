@@ -7,8 +7,9 @@ use crate::{
 };
 
 // https://www.nerdfonts.com/cheat-sheet: nf-dev-terminal
-const ICON: char = '';
+pub const ICON: char = '';
 
+#[derive(Debug, Clone, Copy)]
 pub struct Tmux {
     logger: Logger,
 }

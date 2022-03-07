@@ -6,7 +6,7 @@ use crate::{logging::HasLogger, Error, Success};
 use std::ffi::OsStr;
 
 // nf-oct-package/f487 from https://www.nerdfonts.com/cheat-sheet.
-const ICON: char = '';
+pub const ICON: char = '';
 
 pub trait OsPackageManager: Default + HasLogger {
     const NAME: &'static str;

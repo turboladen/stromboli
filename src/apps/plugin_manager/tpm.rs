@@ -8,8 +8,9 @@ use git2::Repository;
 use std::{path::PathBuf, process::Command};
 
 // https://www.nerdfonts.com/cheat-sheet: nf-dev-terminal_badge
-const ICON: char = '';
+pub const ICON: char = '';
 
+#[derive(Debug, Clone, Copy)]
 pub struct Tpm {
     logger: Logger,
 }
@@ -23,14 +24,17 @@ impl Default for Tpm {
 }
 
 impl Tpm {
-    pub fn source_repository() -> &'static str {
+    #[must_use]
+    pub const fn source_repository() -> &'static str {
         "https://github.com/tmux-plugins/tpm"
     }
 
+    #[must_use]
     pub fn root_dir() -> PathBuf {
         dirs::home_dir().unwrap().join(".tmux/plugins/tpm")
     }
 
+    #[must_use]
     pub fn config_file_path() -> PathBuf {
         dirs::home_dir().unwrap().join(".tmux.conf")
     }

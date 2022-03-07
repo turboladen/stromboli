@@ -9,6 +9,7 @@ use crate::{
 
 pub const ICON: char = '';
 
+#[derive(Debug, Clone, Copy)]
 pub struct Neovim {
     logger: Logger,
 }

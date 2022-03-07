@@ -5,6 +5,7 @@ use crate::{
     Success,
 };
 
+#[derive(Debug, Clone, Copy)]
 pub struct Rubygems {
     logger: Logger,
 }
@@ -16,7 +17,7 @@ impl HasLogger for Rubygems {
 }
 
 impl PackageManager for Rubygems {
-    fn install_package<S>(&self, package_name: S) -> Result<crate::Success, crate::Error>
+    fn install_package<S>(&self, package_name: S) -> Result<Success, crate::Error>
     where
         S: AsRef<std::ffi::OsStr>,
     {
@@ -29,7 +30,7 @@ impl PackageManager for Rubygems {
         Ok(Success::DidIt)
     }
 
-    fn install_package_list<I, S>(&self, package_names: I) -> Result<crate::Success, crate::Error>
+    fn install_package_list<I, S>(&self, package_names: I) -> Result<Success, crate::Error>
     where
         I: IntoIterator<Item = S>,
         S: AsRef<std::ffi::OsStr>,

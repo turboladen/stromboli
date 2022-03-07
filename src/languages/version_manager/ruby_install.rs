@@ -7,8 +7,9 @@ use crate::{
 use std::{ffi::OsStr, process::Command};
 
 // https://www.nerdfonts.com/cheat-sheet: nf-oct-ruby
-const ICON: char = '';
+pub const ICON: char = '';
 
+#[derive(Debug, Clone, Copy)]
 pub struct RubyInstall {
     logger: Logger,
 }

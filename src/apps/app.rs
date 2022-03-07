@@ -1,5 +1,5 @@
-pub(crate) mod neovim;
-pub(crate) mod tmux;
+pub mod neovim;
+pub mod tmux;
 
 pub use self::{neovim::Neovim, tmux::Tmux};
 

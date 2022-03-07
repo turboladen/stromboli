@@ -6,6 +6,7 @@ use crate::{
 };
 use std::{ffi::OsStr, process::Command};
 
+#[derive(Debug, Clone, Copy)]
 pub struct Homebrew {
     logger: Logger,
 }
@@ -32,7 +33,7 @@ pub enum InstallError {
     IO(#[from] std::io::Error),
 
     #[error("transparent")]
-    Utf8(#[from] std::str::Utf8Error)
+    Utf8(#[from] std::str::Utf8Error),
 }
 
 impl Install<RemoteShellScript> for Homebrew {

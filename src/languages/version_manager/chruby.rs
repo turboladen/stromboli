@@ -6,8 +6,9 @@ use crate::{
 use std::process::Command;
 
 // https://www.nerdfonts.com/cheat-sheet: nf-oct-ruby
-const ICON: char = '';
+pub const ICON: char = '';
 
+#[derive(Debug, Clone, Copy)]
 pub struct Chruby {
     logger: Logger,
 }
@@ -35,7 +36,7 @@ impl IsInstalled for Chruby {
 impl Install<RemoteShellScript> for Chruby {
     type Error = std::io::Error;
 
-    fn install(&self) -> Result<crate::Success, Self::Error> {
+    fn install(&self) -> Result<Success, Self::Error> {
         let mut child = Command::new("wget")
             .arg("-0")
             .arg("chruby-0.3.9.tar.gz")

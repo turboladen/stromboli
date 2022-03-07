@@ -1,4 +1,4 @@
-pub(crate) mod tpm;
+pub mod tpm;
 
 pub use tpm::Tpm;
 
