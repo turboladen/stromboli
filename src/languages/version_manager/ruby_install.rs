@@ -1,6 +1,6 @@
 use super::VersionManager;
 use crate::{
-    install::{IdempotentInstall, Install, IsInstalled, RemoteShellScript},
+    install::{method::RemoteShellScript, IdempotentInstall, Install, IsInstalled},
     logging::{HasLogger, Logger},
     Error, Success,
 };
@@ -34,7 +34,9 @@ impl IsInstalled for RubyInstall {
 }
 
 impl Install<RemoteShellScript> for RubyInstall {
-    fn install(&self) -> Result<Success, Error> {
+    type Error = std::io::Error;
+
+    fn install(&self) -> Result<Success, Self::Error> {
         let mut child = Command::new("wget")
             .arg("-0")
             .arg("ruby-install-0.8.3.tar.gz")

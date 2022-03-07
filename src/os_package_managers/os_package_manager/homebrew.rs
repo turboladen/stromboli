@@ -1,6 +1,6 @@
 use super::OsPackageManager;
 use crate::{
-    install::{IdempotentInstall, Install, IsInstalled, RemoteShellScript},
+    install::{self, method::RemoteShellScript, IdempotentInstall, Install, IsInstalled},
     logging::{HasLogger, Logger},
     Error, Success,
 };
@@ -24,10 +24,23 @@ impl HasLogger for Homebrew {
     }
 }
 
+impl install::Method for Homebrew {}
+
+#[derive(Debug, thiserror::Error)]
+pub enum InstallError {
+    #[error("transparent")]
+    IO(#[from] std::io::Error),
+
+    #[error("transparent")]
+    Utf8(#[from] std::str::Utf8Error)
+}
+
 impl Install<RemoteShellScript> for Homebrew {
+    type Error = InstallError;
+
     // `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
     //
-    fn install(&self) -> Result<Success, Error> {
+    fn install(&self) -> Result<Success, Self::Error> {
         let output = Command::new("curl")
             .arg("-fsSL")
             .arg("https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh")

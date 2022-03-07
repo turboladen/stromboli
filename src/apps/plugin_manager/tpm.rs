@@ -1,6 +1,6 @@
 use super::PluginManager;
 use crate::{
-    install::{Git, IdempotentInstall, Install, IsInstalled},
+    install::{method::Git, IdempotentInstall, Install, IsInstalled},
     logging::{HasLogger, Logger},
     Error, Success,
 };
@@ -49,7 +49,9 @@ impl IsInstalled for Tpm {
 }
 
 impl Install<Git> for Tpm {
-    fn install(&self) -> Result<Success, Error> {
+    type Error = git2::Error;
+
+    fn install(&self) -> Result<Success, Self::Error> {
         self.logger().log_sub_heading_group("tpm-install", || {
             let tpm_root_dir = Self::root_dir();
 

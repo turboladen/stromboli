@@ -1,27 +1,25 @@
-use crate::{logging::HasLogger, Error, Success};
+pub mod method;
 
-pub trait InstallMethod {}
+pub use self::method::Method;
 
-pub struct RemoteShellScript;
-impl InstallMethod for RemoteShellScript {}
-
-pub struct Git;
-impl InstallMethod for Git {}
+use crate::{logging::HasLogger, Success};
 
 pub trait Install<T>
 where
-    T: InstallMethod,
+    T: Method,
 {
-    fn install(&self) -> Result<Success, Error>;
+    type Error;
+
+    fn install(&self) -> Result<Success, Self::Error>;
 }
 
 pub trait InstallWithLogging<T>: Install<T> + HasLogger
 where
-    T: InstallMethod,
+    T: Method,
 {
     /// Wrapper around `install()`, but adds log messages to the start & end of that call.
     ///
-    fn install_with_logging(&self) -> Result<Success, Error> {
+    fn install_with_logging(&self) -> Result<Success, Self::Error> {
         self.logger().log_heading_group(|| self.install())
     }
 }
@@ -29,7 +27,7 @@ where
 impl<T, U> InstallWithLogging<U> for T
 where
     T: Install<U> + HasLogger,
-    U: InstallMethod,
+    U: Method,
 {
 }
 
@@ -39,9 +37,9 @@ pub trait IsInstalled {
 
 pub trait IdempotentInstall<T>: IsInstalled + Install<T>
 where
-    T: InstallMethod,
+    T: Method,
 {
-    fn idempotent_install(&self) -> Result<Success, Error> {
+    fn idempotent_install(&self) -> Result<Success, Self::Error> {
         if self.is_installed() {
             return Ok(Success::AlreadyInstalled);
         }
@@ -52,9 +50,9 @@ where
 
 pub trait IdempotentInstallWithLogging<T>: IdempotentInstall<T> + HasLogger
 where
-    T: InstallMethod,
+    T: Method,
 {
-    fn idempotent_install_with_logging(&self) -> Result<Success, Error> {
+    fn idempotent_install_with_logging(&self) -> Result<Success, Self::Error> {
         self.logger().log_heading_group(|| {
             if self.is_installed() {
                 self.logger().log_msg("Already installed.");
@@ -69,6 +67,6 @@ where
 impl<T, U> IdempotentInstallWithLogging<U> for T
 where
     T: IdempotentInstall<U> + HasLogger,
-    U: InstallMethod,
+    U: Method,
 {
 }
