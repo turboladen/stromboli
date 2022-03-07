@@ -1,9 +1,9 @@
-use std::process::Command;
 use super::PackageManager;
 use crate::{
     logging::{HasLogger, Logger},
     Success,
 };
+use std::process::Command;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Rubygems {
