@@ -3,7 +3,7 @@ use crate::{
     actions::download,
     install::{self, method::GitHubRelease, Install, IsInstalled},
     logging::HasLogger,
-    os_package_managers::{OsPackageManager, os_package_manager},
+    os_package_managers::{os_package_manager, OsPackageManager},
     Logger, Success,
 };
 

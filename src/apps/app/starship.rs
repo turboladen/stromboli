@@ -1,9 +1,10 @@
+use std::process::Command;
+
 use super::App;
 use crate::{
-    actions::download,
     install::{self, method::GitHubRelease, Install, IsInstalled},
     logging::HasLogger,
-    os_package_managers::OsPackageManager,
+    os_package_managers::{os_package_manager, OsPackageManager},
     Logger, Success,
 };
 
@@ -40,7 +41,7 @@ impl<T> Install<T> for Starship
 where
     T: OsPackageManager + install::Method,
 {
-    type Error = crate::Error;
+    type Error = os_package_manager::Error;
 
     fn install(&self) -> Result<Success, Self::Error> {
         let pkg_manager = T::default();
@@ -51,10 +52,10 @@ where
 #[derive(Debug, thiserror::Error)]
 pub enum InstallFromGitHubReleaseError {
     #[error("transparent")]
-    Download(#[from] download::Error),
+    IO(#[from] std::io::Error),
 
     #[error("transparent")]
-    IO(#[from] std::io::Error),
+    Utf8(#[from] std::str::Utf8Error),
 }
 
 impl Install<GitHubRelease<'_>> for Starship {

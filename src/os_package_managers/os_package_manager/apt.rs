@@ -4,7 +4,7 @@ use crate::{
     logging::{HasLogger, Logger},
     Success,
 };
-use std::{ffi::OsStr, path::Path, process::Command};
+use std::{ffi::OsStr, process::Command};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Apt {

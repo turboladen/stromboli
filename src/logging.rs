@@ -86,6 +86,6 @@ impl Logger {
     }
 }
 
-pub(crate) fn log_dashed_line() {
+pub fn log_dashed_line() {
     log::info!("-----------------------------------------------------------------------");
 }

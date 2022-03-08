@@ -2,7 +2,7 @@ use super::OsPackageManager;
 use crate::{
     install::{self, method::RemoteShellScript, IdempotentInstall, Install, IsInstalled},
     logging::{HasLogger, Logger},
-    Error, Success,
+    Success,
 };
 use std::{ffi::OsStr, process::Command};
 
@@ -71,14 +71,14 @@ impl OsPackageManager for Homebrew {
 
     // brew bundle --global
     //
-    fn install_all_packages(&self) -> Result<Success, Error> {
+    fn install_all_packages(&self) -> Result<Success, super::Error> {
         let mut child = Command::new("brew").arg("bundle").arg("--global").spawn()?;
         child.wait()?;
 
         Ok(Success::DidIt)
     }
 
-    fn install_package<S>(&self, package_name: S) -> Result<Success, Error>
+    fn install_package<S>(&self, package_name: S) -> Result<Success, super::Error>
     where
         S: AsRef<OsStr>,
     {
@@ -91,7 +91,7 @@ impl OsPackageManager for Homebrew {
         Ok(Success::DidIt)
     }
 
-    fn install_package_list<I, S>(&self, package_names: I) -> Result<Success, Error>
+    fn install_package_list<I, S>(&self, package_names: I) -> Result<Success, super::Error>
     where
         I: IntoIterator<Item = S>,
         S: AsRef<OsStr>,

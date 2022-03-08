@@ -83,7 +83,7 @@ impl PluginManager for Tpm {
     fn install_all_packages(&self) -> Result<Success, Error> {
         self.logger().log_sub_heading_group("tpm-install", || {
             let cmd = Self::root_dir().join("bin/install_plugins");
-            let _ = Command::new(cmd).output()?;
+            let _output = Command::new(cmd).output()?;
 
             Ok(Success::DidIt)
         })
