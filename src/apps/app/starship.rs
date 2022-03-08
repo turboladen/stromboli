@@ -3,46 +3,48 @@ use crate::{
     actions::download,
     install::{self, method::GitHubRelease, Install, IsInstalled},
     logging::HasLogger,
-    os_package_managers::{OsPackageManager, os_package_manager},
+    os_package_managers::OsPackageManager,
     Logger, Success,
 };
 
-pub const ICON: char = '';
+pub const ICON: char = '';
+const NAME: &str = "starship";
+const CMD: &str = NAME;
 
 #[derive(Debug, Clone, Copy)]
-pub struct Neovim {
+pub struct Starship {
     logger: Logger,
 }
 
-impl Default for Neovim {
+impl Default for Starship {
     fn default() -> Self {
-        let logger = Logger::new(ICON, "neovim");
+        let logger = Logger::new(ICON, NAME);
 
         Self { logger }
     }
 }
 
-impl HasLogger for Neovim {
+impl HasLogger for Starship {
     fn logger(&self) -> &Logger {
         &self.logger
     }
 }
 
-impl IsInstalled for Neovim {
+impl IsInstalled for Starship {
     fn is_installed(&self) -> bool {
-        crate::command_exists("nvim")
+        crate::command_exists(CMD)
     }
 }
 
-impl<T> Install<T> for Neovim
+impl<T> Install<T> for Starship
 where
     T: OsPackageManager + install::Method,
 {
-    type Error = os_package_manager::Error;
+    type Error = crate::Error;
 
     fn install(&self) -> Result<Success, Self::Error> {
         let pkg_manager = T::default();
-        pkg_manager.install_package("neovim")
+        pkg_manager.install_package(NAME)
     }
 }
 
@@ -55,21 +57,22 @@ pub enum InstallFromGitHubReleaseError {
     IO(#[from] std::io::Error),
 }
 
-impl Install<GitHubRelease<'_>> for Neovim {
+impl Install<GitHubRelease<'_>> for Starship {
     type Error = InstallFromGitHubReleaseError;
 
-    #[cfg(target_os = "macos")]
     fn install(&self) -> Result<Success, Self::Error> {
-        use crate::actions::{Action, Gunzip};
+        let output = Command::new("curl")
+            .arg("-fsSL")
+            .arg("https://starship.rs/install.sh")
+            .output()?;
 
-        let ghr = GitHubRelease::new("neovim", "neovim", "0.6.1", "nvim-macos.tar.gz");
-        let tarball = ghr.download()?;
-        let executable = Gunzip::new(tarball).act()?;
-        std::fs::copy(&executable, "/usr/local/bin/")?;
-        std::fs::remove_file(executable)?;
+        // The stdout output is a shell script that needs to be executed.
+        let stdout = std::str::from_utf8(&output.stdout)?;
+        let mut child = Command::new("sh").arg("-c").arg(stdout).spawn()?;
+        child.wait()?;
 
         Ok(Success::DidIt)
     }
 }
 
-impl App for Neovim {}
+impl App for Starship {}

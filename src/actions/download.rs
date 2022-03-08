@@ -46,7 +46,7 @@ where
         let mut response = reqwest::blocking::get(self.url.clone())?;
 
         let mut file = if self.destination.as_ref().exists() {
-            todo!()
+            todo!("File exists already")
         } else {
             File::create(&self.destination)?
         };
