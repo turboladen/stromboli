@@ -1,8 +1,7 @@
 use super::OsPackageManager;
 use crate::{
-    install::{self, method::RemoteShellScript, IdempotentInstall, Install, IsInstalled},
-    logging::{HasLogger, Logger},
-    Success,
+    install::{self, method::RemoteShellScript, CommandExists, IdempotentInstall, Install},
+    Logger, Success,
 };
 use std::{ffi::OsStr, process::Command};
 
@@ -16,12 +15,6 @@ impl Default for Homebrew {
         Self {
             logger: Logger::new(super::ICON, "homebrew"),
         }
-    }
-}
-
-impl HasLogger for Homebrew {
-    fn logger(&self) -> &Logger {
-        &self.logger
     }
 }
 
@@ -42,28 +35,26 @@ impl Install<RemoteShellScript> for Homebrew {
     // `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
     //
     fn install(&self) -> Result<Success, Self::Error> {
-        let output = Command::new("curl")
-            .arg("-fsSL")
-            .arg("https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh")
-            .output()?;
+        self.logger.log_heading_group(|| {
+            let output = Command::new("curl")
+                .arg("-fsSL")
+                .arg("https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh")
+                .output()?;
 
-        // The stdout output is a shell script that needs to be executed.
-        let stdout = std::str::from_utf8(&output.stdout)?;
-        let mut child = Command::new("bash").arg("-c").arg(stdout).spawn()?;
-        child.wait()?;
+            // The stdout output is a shell script that needs to be executed.
+            let stdout = std::str::from_utf8(&output.stdout)?;
+            let mut child = Command::new("bash").arg("-c").arg(stdout).spawn()?;
+            child.wait()?;
 
-        Ok(Success::DidIt)
+            Ok(Success::DidIt)
+        })
     }
 }
 
 impl IdempotentInstall<RemoteShellScript> for Homebrew {}
 
-impl IsInstalled for Homebrew {
-    /// Is the package manager installed?
-    ///
-    fn is_installed(&self) -> bool {
-        crate::command_exists("brew")
-    }
+impl CommandExists for Homebrew {
+    const CMD: &'static str = "brew";
 }
 
 impl OsPackageManager for Homebrew {

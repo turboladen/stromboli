@@ -1,16 +1,17 @@
-use std::process::Command;
-
 use super::App;
 use crate::{
-    install::{self, method::GitHubRelease, Install, IsInstalled},
-    logging::HasLogger,
+    install::{
+        self,
+        method::{remote_shell_script, RemoteShellScript},
+        CommandExists, Install,
+    },
     os_package_managers::{os_package_manager, OsPackageManager},
     Logger, Success,
 };
+use std::process::Command;
 
 pub const ICON: char = '';
 const NAME: &str = "starship";
-const CMD: &str = NAME;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Starship {
@@ -25,16 +26,8 @@ impl Default for Starship {
     }
 }
 
-impl HasLogger for Starship {
-    fn logger(&self) -> &Logger {
-        &self.logger
-    }
-}
-
-impl IsInstalled for Starship {
-    fn is_installed(&self) -> bool {
-        crate::command_exists(CMD)
-    }
+impl CommandExists for Starship {
+    const CMD: &'static str = NAME;
 }
 
 impl<T> Install<T> for Starship
@@ -44,24 +37,20 @@ where
     type Error = os_package_manager::Error;
 
     fn install(&self) -> Result<Success, Self::Error> {
-        let pkg_manager = T::default();
-        pkg_manager.install_package(NAME)
+        self.logger
+            .log_sub_heading_group("install-via-os-package-manager", || {
+                let pkg_manager = T::default();
+                pkg_manager.install_package(NAME)
+            })
     }
 }
 
-#[derive(Debug, thiserror::Error)]
-pub enum InstallFromGitHubReleaseError {
-    #[error("transparent")]
-    IO(#[from] std::io::Error),
-
-    #[error("transparent")]
-    Utf8(#[from] std::str::Utf8Error),
-}
-
-impl Install<GitHubRelease<'_>> for Starship {
-    type Error = InstallFromGitHubReleaseError;
+impl Install<RemoteShellScript> for Starship {
+    type Error = remote_shell_script::Error;
 
     fn install(&self) -> Result<Success, Self::Error> {
+        self.logger
+            .log_sub_heading_group("install-via-remote-shell-script", || {
         let output = Command::new("curl")
             .arg("-fsSL")
             .arg("https://starship.rs/install.sh")
@@ -73,6 +62,7 @@ impl Install<GitHubRelease<'_>> for Starship {
         child.wait()?;
 
         Ok(Success::DidIt)
+            })
     }
 }
 

@@ -19,12 +19,12 @@ pub mod actions;
 pub mod apps;
 pub mod install;
 pub mod languages;
-pub(crate) mod logging;
+pub mod logger;
 pub mod os_package_managers;
 
 pub(crate) mod error;
 
-pub use self::{error::Error, logging::Logger};
+pub use self::{error::Error, logger::Logger};
 pub use dirs;
 
 use std::process::{Command, Stdio};

@@ -1,41 +1,33 @@
 use super::Action;
+use reqwest::Url;
 use std::{
     fs::File,
     path::{Path, PathBuf},
 };
 
-#[derive(Debug, thiserror::Error)]
-pub enum Error {
-    #[error("transparent")]
-    Reqwest(#[from] reqwest::Error),
-
-    #[error("transparent")]
-    IO(#[from] std::io::Error),
+pub struct Download<'a, T>
+where
+    T: AsRef<Path> + ?Sized,
+{
+    url: Url,
+    destination: &'a T,
 }
 
-pub struct Download<'a, T, U>
+impl<'a, T> Download<'a, T>
 where
-    T: reqwest::IntoUrl,
-    U: AsRef<Path> + ?Sized,
+    T: AsRef<Path> + ?Sized,
 {
-    url: T,
-    destination: &'a U,
-}
-
-impl<'a, T, U> Download<'a, T, U>
-where
-    T: reqwest::IntoUrl,
-    U: AsRef<Path> + ?Sized,
-{
-    pub fn new(url: T, destination: &'a U) -> Self {
-        Self { url, destination }
+    pub fn new<U: reqwest::IntoUrl>(url: U, destination: &'a T) -> Self {
+        Self {
+            url: url.into_url().unwrap(),
+            destination,
+        }
     }
 }
 
-impl<'a, T, U> Action for Download<'a, T, U>
+impl<'a, T> Action for Download<'a, T>
 where
-    T: reqwest::IntoUrl + Clone,
-    U: AsRef<Path> + ?Sized,
+    T: AsRef<Path> + ?Sized,
 {
     /// Returns the path to the downloaded file.
     ///
@@ -55,4 +47,13 @@ where
 
         Ok(self.destination.as_ref().to_path_buf())
     }
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    #[error("transparent")]
+    Reqwest(#[from] reqwest::Error),
+
+    #[error("transparent")]
+    IO(#[from] std::io::Error),
 }

@@ -1,7 +1,6 @@
 use crate::{
-    install::{method::RemoteShellScript, IdempotentInstall, Install, IsInstalled},
-    logging::{HasLogger, Logger},
-    Success,
+    install::{method::RemoteShellScript, CommandExists, IdempotentInstall, Install},
+    Logger, Success,
 };
 use std::process::Command;
 
@@ -21,49 +20,43 @@ impl Default for Chruby {
     }
 }
 
-impl HasLogger for Chruby {
-    fn logger(&self) -> &Logger {
-        &self.logger
-    }
-}
-
-impl IsInstalled for Chruby {
-    fn is_installed(&self) -> bool {
-        crate::command_exists("chruby")
-    }
+impl CommandExists for Chruby {
+    const CMD: &'static str = "chruby";
 }
 
 impl Install<RemoteShellScript> for Chruby {
     type Error = std::io::Error;
 
     fn install(&self) -> Result<Success, Self::Error> {
-        let mut child = Command::new("wget")
-            .arg("-0")
-            .arg("chruby-0.3.9.tar.gz")
-            .arg("https://github.com/postmodern/chruby/archive/v0.3.9.tar.gz")
-            .spawn()?;
-        child.wait()?;
+        self.logger.log_heading_group(|| {
+            let mut child = Command::new("wget")
+                .arg("-0")
+                .arg("chruby-0.3.9.tar.gz")
+                .arg("https://github.com/postmodern/chruby/archive/v0.3.9.tar.gz")
+                .spawn()?;
+            child.wait()?;
 
-        let mut child = Command::new("tar")
-            .arg("-xzvf")
-            .arg("chruby-0.3.9.tar.gz")
-            .spawn()?;
-        child.wait()?;
+            let mut child = Command::new("tar")
+                .arg("-xzvf")
+                .arg("chruby-0.3.9.tar.gz")
+                .spawn()?;
+            child.wait()?;
 
-        let mut child = Command::new("tar")
-            .arg("-xzvf")
-            .arg("chruby-0.3.9.tar.gz")
-            .spawn()?;
-        child.wait()?;
+            let mut child = Command::new("tar")
+                .arg("-xzvf")
+                .arg("chruby-0.3.9.tar.gz")
+                .spawn()?;
+            child.wait()?;
 
-        let mut child = Command::new("sudo")
-            .current_dir("chruby-0.3.9")
-            .arg("make")
-            .arg("install")
-            .spawn()?;
-        child.wait()?;
+            let mut child = Command::new("sudo")
+                .current_dir("chruby-0.3.9")
+                .arg("make")
+                .arg("install")
+                .spawn()?;
+            child.wait()?;
 
-        Ok(Success::DidIt)
+            Ok(Success::DidIt)
+        })
     }
 }
 

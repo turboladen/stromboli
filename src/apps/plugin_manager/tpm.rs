@@ -1,8 +1,7 @@
 use super::PluginManager;
 use crate::{
-    install::{method::Git, IdempotentInstall, Install, IsInstalled},
-    logging::{HasLogger, Logger},
-    Error, Success,
+    install::{method::Git, CommandExists, IdempotentInstall, Install},
+    Error, Logger, Success,
 };
 use git2::Repository;
 use std::{path::PathBuf, process::Command};
@@ -40,14 +39,10 @@ impl Tpm {
     }
 }
 
-impl HasLogger for Tpm {
-    fn logger(&self) -> &Logger {
-        &self.logger
-    }
-}
+impl CommandExists for Tpm {
+    const CMD: &'static str = "";
 
-impl IsInstalled for Tpm {
-    fn is_installed(&self) -> bool {
+    fn command_exists() -> bool {
         Self::root_dir().exists() && Self::config_file_path().exists()
     }
 }
@@ -56,17 +51,17 @@ impl Install<Git> for Tpm {
     type Error = git2::Error;
 
     fn install(&self) -> Result<Success, Self::Error> {
-        self.logger().log_sub_heading_group("tpm-install", || {
+        self.logger.log_sub_heading_group("tpm-install", || {
             let tpm_root_dir = Self::root_dir();
 
-            self.logger().log_sub_msg(
+            self.logger.log_sub_msg(
                 "tpm-install",
                 format!("Cloning '{}' to '{}'", Self::source_repository(), tpm_root_dir.display()),
             );
 
             let _repo = Repository::clone(Self::source_repository(), tpm_root_dir)?;
             let msg = "More to do; check instructions at 'https://github.com/tmux-plugins/tpm#installation'";
-            self.logger().log_sub_msg("tpm-install", msg);
+            self.logger.log_sub_msg("tpm-install", msg);
 
             Ok(Success::MoreToDo(msg.to_string()))
         })
@@ -81,7 +76,7 @@ impl PluginManager for Tpm {
     /// https://github.com/tmux-plugins/tpm/blob/master/docs/managing_plugins_via_cmd_line.mod
     ///
     fn install_all_packages(&self) -> Result<Success, Error> {
-        self.logger().log_sub_heading_group("tpm-install", || {
+        self.logger.log_sub_heading_group("tpm-install", || {
             let cmd = Self::root_dir().join("bin/install_plugins");
             let _output = Command::new(cmd).output()?;
 

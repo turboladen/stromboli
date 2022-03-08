@@ -1,8 +1,7 @@
 use super::{Error, OsPackageManager};
 use crate::{
-    install::{self, IsInstalled},
-    logging::{HasLogger, Logger},
-    Success,
+    install::{self, CommandExists},
+    Logger, Success,
 };
 use std::{ffi::OsStr, process::Command};
 
@@ -14,47 +13,43 @@ pub struct Dpkg {
 impl Default for Dpkg {
     fn default() -> Self {
         Self {
-            logger: Logger::new(super::ICON, "dpkg"),
+            logger: Logger::new(super::ICON, Self::NAME),
         }
-    }
-}
-
-impl HasLogger for Dpkg {
-    fn logger(&self) -> &Logger {
-        &self.logger
     }
 }
 
 impl install::Method for Dpkg {}
 
-impl IsInstalled for Dpkg {
-    /// Is the package manager installed?
-    ///
-    fn is_installed(&self) -> bool {
-        crate::command_exists("dpkg")
-    }
+impl CommandExists for Dpkg {
+    const CMD: &'static str = "dpkg";
 }
 
 impl OsPackageManager for Dpkg {
-    const NAME: &'static str = "dpkg";
+    const NAME: &'static str = Self::CMD;
 
     fn install_all_packages(&self) -> Result<Success, Error> {
-        Ok(Success::NothingToDo)
+        self.logger
+            .log_sub_heading_group("install-all-packages", || {
+                self.logger.log_msg("Nothing to do.");
+                Ok(Success::NothingToDo)
+            })
     }
 
     fn install_package<S>(&self, package_name: S) -> Result<Success, Error>
     where
         S: AsRef<OsStr>,
     {
-        let mut child = Command::new("sudo")
-            .arg("dpkg")
-            .arg("--install")
-            .arg("--refuse-downgrade")
-            .arg(package_name)
-            .spawn()?;
-        child.wait()?;
+        self.logger.log_sub_heading_group("install-pacakge", || {
+            let mut child = Command::new("sudo")
+                .arg("dpkg")
+                .arg("--install")
+                .arg("--refuse-downgrade")
+                .arg(package_name)
+                .spawn()?;
+            child.wait()?;
 
-        Ok(Success::DidIt)
+            Ok(Success::DidIt)
+        })
     }
 
     fn install_package_list<I, S>(&self, package_names: I) -> Result<Success, Error>
@@ -62,10 +57,12 @@ impl OsPackageManager for Dpkg {
         I: IntoIterator<Item = S>,
         S: AsRef<OsStr>,
     {
-        for package_name in package_names {
-            self.install_package(package_name)?;
-        }
+        self.logger.log_sub_heading_group("install-pacakge-list", || {
+            for package_name in package_names {
+                self.install_package(package_name)?;
+            }
 
-        Ok(Success::DidIt)
+            Ok(Success::DidIt)
+        })
     }
 }

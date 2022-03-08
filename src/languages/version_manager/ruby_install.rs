@@ -1,8 +1,7 @@
 use super::VersionManager;
 use crate::{
-    install::{method::RemoteShellScript, IdempotentInstall, Install, IsInstalled},
-    logging::{HasLogger, Logger},
-    Error, Success,
+    install::{method::RemoteShellScript, CommandExists, IdempotentInstall, Install},
+    Error, Logger, Success,
 };
 use std::{ffi::OsStr, process::Command};
 
@@ -22,49 +21,43 @@ impl Default for RubyInstall {
     }
 }
 
-impl HasLogger for RubyInstall {
-    fn logger(&self) -> &Logger {
-        &self.logger
-    }
-}
-
-impl IsInstalled for RubyInstall {
-    fn is_installed(&self) -> bool {
-        crate::command_exists("ruby-install")
-    }
+impl CommandExists for RubyInstall {
+    const CMD: &'static str = "ruby-install";
 }
 
 impl Install<RemoteShellScript> for RubyInstall {
     type Error = std::io::Error;
 
     fn install(&self) -> Result<Success, Self::Error> {
-        let mut child = Command::new("wget")
-            .arg("-0")
-            .arg("ruby-install-0.8.3.tar.gz")
-            .arg("https://github.com/postmodern/ruby-install/archive/v0.8.3.tar.gz")
-            .spawn()?;
-        child.wait()?;
+        self.logger.log_heading_group(|| {
+            let mut child = Command::new("wget")
+                .arg("-0")
+                .arg("ruby-install-0.8.3.tar.gz")
+                .arg("https://github.com/postmodern/ruby-install/archive/v0.8.3.tar.gz")
+                .spawn()?;
+            child.wait()?;
 
-        let mut child = Command::new("tar")
-            .arg("-xzvf")
-            .arg("ruby-install-0.8.3.tar.gz")
-            .spawn()?;
-        child.wait()?;
+            let mut child = Command::new("tar")
+                .arg("-xzvf")
+                .arg("ruby-install-0.8.3.tar.gz")
+                .spawn()?;
+            child.wait()?;
 
-        let mut child = Command::new("tar")
-            .arg("-xzvf")
-            .arg("ruby-install-0.8.3.tar.gz")
-            .spawn()?;
-        child.wait()?;
+            let mut child = Command::new("tar")
+                .arg("-xzvf")
+                .arg("ruby-install-0.8.3.tar.gz")
+                .spawn()?;
+            child.wait()?;
 
-        let mut child = Command::new("sudo")
-            .current_dir("ruby-install-0.8.3")
-            .arg("make")
-            .arg("install")
-            .spawn()?;
-        child.wait()?;
+            let mut child = Command::new("sudo")
+                .current_dir("ruby-install-0.8.3")
+                .arg("make")
+                .arg("install")
+                .spawn()?;
+            child.wait()?;
 
-        Ok(Success::DidIt)
+            Ok(Success::DidIt)
+        })
     }
 }
 

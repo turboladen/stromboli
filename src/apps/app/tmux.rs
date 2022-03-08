@@ -1,37 +1,14 @@
 use super::App;
-use crate::{
-    apps::plugin_manager::Tpm,
-    install::IsInstalled,
-    logging::{HasLogger, Logger},
-    NewPluginManager,
-};
+use crate::{apps::plugin_manager::Tpm, install::CommandExists, NewPluginManager};
 
 // https://www.nerdfonts.com/cheat-sheet: nf-dev-terminal
 pub const ICON: char = '';
 
-#[derive(Debug, Clone, Copy)]
-pub struct Tmux {
-    logger: Logger,
-}
+#[derive(Debug, Clone, Copy, Default)]
+pub struct Tmux;
 
-impl Default for Tmux {
-    fn default() -> Self {
-        let logger = Logger::new(ICON, "tmux");
-
-        Self { logger }
-    }
-}
-
-impl HasLogger for Tmux {
-    fn logger(&self) -> &Logger {
-        &self.logger
-    }
-}
-
-impl IsInstalled for Tmux {
-    fn is_installed(&self) -> bool {
-        crate::command_exists("tmux")
-    }
+impl CommandExists for Tmux {
+    const CMD: &'static str = "tmux";
 }
 
 impl NewPluginManager for Tmux {
