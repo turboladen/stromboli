@@ -40,15 +40,15 @@ impl OsPackageManager for Apt {
         S: AsRef<OsStr>,
     {
         self.logger.log_sub_heading_group("install-pacakge", || {
-        let mut child = Command::new("sudo")
-            .arg("apt-get")
-            .arg("install")
-            .arg("-y")
-            .arg(package_name)
-            .spawn()?;
-        child.wait()?;
+            let mut child = Command::new("sudo")
+                .arg("apt-get")
+                .arg("install")
+                .arg("-y")
+                .arg(package_name)
+                .spawn()?;
+            child.wait()?;
 
-        Ok(Success::DidIt)
+            Ok(Success::DidIt)
         })
     }
 
@@ -59,15 +59,15 @@ impl OsPackageManager for Apt {
     {
         self.logger
             .log_sub_heading_group("install-pacakge-list", || {
-        let mut child = Command::new("sudo")
-            .arg("apt-get")
-            .arg("install")
-            .arg("-y")
-            .args(package_names)
-            .spawn()?;
-        child.wait()?;
+                let mut child = Command::new("sudo")
+                    .arg("apt-get")
+                    .arg("install")
+                    .arg("-y")
+                    .args(package_names)
+                    .spawn()?;
+                child.wait()?;
 
-        Ok(Success::DidIt)
+                Ok(Success::DidIt)
             })
     }
 }

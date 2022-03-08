@@ -51,17 +51,17 @@ impl Install<RemoteShellScript> for Starship {
     fn install(&self) -> Result<Success, Self::Error> {
         self.logger
             .log_sub_heading_group("install-via-remote-shell-script", || {
-        let output = Command::new("curl")
-            .arg("-fsSL")
-            .arg("https://starship.rs/install.sh")
-            .output()?;
+                let output = Command::new("curl")
+                    .arg("-fsSL")
+                    .arg("https://starship.rs/install.sh")
+                    .output()?;
 
-        // The stdout output is a shell script that needs to be executed.
-        let stdout = std::str::from_utf8(&output.stdout)?;
-        let mut child = Command::new("sh").arg("-c").arg(stdout).spawn()?;
-        child.wait()?;
+                // The stdout output is a shell script that needs to be executed.
+                let stdout = std::str::from_utf8(&output.stdout)?;
+                let mut child = Command::new("sh").arg("-c").arg(stdout).spawn()?;
+                child.wait()?;
 
-        Ok(Success::DidIt)
+                Ok(Success::DidIt)
             })
     }
 }

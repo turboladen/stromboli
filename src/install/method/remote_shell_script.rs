@@ -25,6 +25,7 @@ impl RemoteShellScript {
         Ok(path)
     }
 
+    #[must_use]
     pub fn script_name_from_url(&self) -> Option<&str> {
         let path_segments = self.url.path_segments()?;
         path_segments.last()

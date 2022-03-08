@@ -1,5 +1,5 @@
 use colored::Colorize;
-use std::fmt::{Display};
+use std::fmt::Display;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Logger {
@@ -18,7 +18,7 @@ impl Logger {
     }
 
     pub fn log_sub_header<T: AsRef<str>>(&self, sub_name: T) {
-        log_sub_header(self.subject_name.bold(), sub_name.as_ref().bold())
+        log_sub_header(self.subject_name.bold(), sub_name.as_ref().bold());
     }
 
     pub fn log_msg<T: Display>(&self, msg: T) {
@@ -69,7 +69,7 @@ impl Logger {
 
 pub fn log_header<T: Display>(subject: T) {
     log_dashed_line();
-    log::info!("[ {subject} ]")
+    log::info!("[ {subject} ]");
 }
 
 pub fn log_msg<T: Display, U: Display>(subject: T, msg: U) {

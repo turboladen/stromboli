@@ -1,5 +1,5 @@
 use super::Language;
-use crate::{install::CommandExists};
+use crate::install::CommandExists;
 
 // https://www.nerdfonts.com/cheat-sheet: nf-seti-ruby
 pub const ICON: char = '';

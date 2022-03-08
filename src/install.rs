@@ -16,6 +16,7 @@ where
 pub trait CommandExists {
     const CMD: &'static str;
 
+    #[must_use]
     fn command_exists() -> bool {
         let result = crate::command_exists(Self::CMD);
         logger::log_msg(Self::CMD, format!("{} exists? {result}", Self::CMD));

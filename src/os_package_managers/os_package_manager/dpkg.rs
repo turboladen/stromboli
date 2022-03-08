@@ -57,12 +57,13 @@ impl OsPackageManager for Dpkg {
         I: IntoIterator<Item = S>,
         S: AsRef<OsStr>,
     {
-        self.logger.log_sub_heading_group("install-pacakge-list", || {
-            for package_name in package_names {
-                self.install_package(package_name)?;
-            }
+        self.logger
+            .log_sub_heading_group("install-pacakge-list", || {
+                for package_name in package_names {
+                    self.install_package(package_name)?;
+                }
 
-            Ok(Success::DidIt)
-        })
+                Ok(Success::DidIt)
+            })
     }
 }

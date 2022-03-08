@@ -31,26 +31,26 @@ impl Install<GithubRelease<'_>> for GitDelta {
     fn install(&self) -> Result<Success, Self::Error> {
         self.logger
             .log_sub_heading_group("install-via-github-release", || {
-        if cfg!(target_os = "linux") {
-            use crate::os_package_managers::{os_package_manager::Dpkg, OsPackageManager};
+                if cfg!(target_os = "linux") {
+                    use crate::os_package_managers::{os_package_manager::Dpkg, OsPackageManager};
 
-            if Dpkg::command_exists() {
-                let deb_path = GithubRelease::new(
-                    "dandavison",
-                    "delta",
-                    "0.12.1",
-                    "git-delta_0.12.1_amd64.deb",
-                )
-                .download()?;
+                    if Dpkg::command_exists() {
+                        let deb_path = GithubRelease::new(
+                            "dandavison",
+                            "delta",
+                            "0.12.1",
+                            "git-delta_0.12.1_amd64.deb",
+                        )
+                        .download()?;
 
-                Dpkg::default().install_package(&deb_path)?;
-                std::fs::remove_file(deb_path)?;
-            } else {
-                todo!()
-            }
-        }
+                        Dpkg::default().install_package(&deb_path)?;
+                        std::fs::remove_file(deb_path)?;
+                    } else {
+                        todo!()
+                    }
+                }
 
-        Ok(Success::DidIt)
+                Ok(Success::DidIt)
             })
     }
 }
