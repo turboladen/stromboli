@@ -1,5 +1,5 @@
-pub(crate) mod github_release;
-pub(crate) mod remote_shell_script;
+pub mod github_release;
+pub mod remote_shell_script;
 
 pub use self::{github_release::GithubRelease, remote_shell_script::RemoteShellScript};
 

@@ -8,8 +8,15 @@ pub trait Install<T>
 where
     T: Method,
 {
+    /// Each installation type can fail for reasons that are specific to it; this allows for
+    /// specifying errors that make sense in that context.
+    ///
     type Error;
 
+    /// # Errors
+    ///
+    /// Errors depend on the installation method.
+    ///
     fn install(&self) -> Result<Success, Self::Error>;
 }
 
@@ -19,7 +26,7 @@ pub trait CommandExists {
     #[must_use]
     fn command_exists() -> bool {
         let result = crate::command_exists(Self::CMD);
-        logger::log_msg(Self::CMD, format!("{} exists? {result}", Self::CMD));
+        logger::log_msg(Self::CMD, format!("`{}` exists? {result}", Self::CMD));
 
         result
     }

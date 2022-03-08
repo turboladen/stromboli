@@ -1,28 +1,36 @@
-use std::path::PathBuf;
-
-use crate::actions::{
-    download::{self, Download},
-    Action,
+use crate::{
+    actions::{
+        download::{self, Download},
+        Action,
+    },
+    Logger,
 };
 use reqwest::{IntoUrl, Url};
+use std::path::PathBuf;
+
+pub const ICON: char = 'ﰌ';
 
 #[derive(Debug, Clone)]
 pub struct RemoteShellScript {
+    logger: Logger,
     url: Url,
 }
 
 impl RemoteShellScript {
     pub fn try_new<T: IntoUrl>(url: T) -> Result<Self, reqwest::Error> {
         Ok(Self {
+            logger: Logger::new(ICON, "remote-shell-script"),
             url: url.into_url()?,
         })
     }
 
     pub fn download(&self) -> Result<PathBuf, Error> {
-        let script_file_name = self.script_name_from_url().unwrap();
-        let path = Download::new(self.url.clone(), script_file_name).act()?;
+        self.logger.log_sub_heading_group(&self.url, || {
+            let script_file_name = self.script_name_from_url().unwrap();
+            let path = Download::new(self.url.clone(), script_file_name).act()?;
 
-        Ok(path)
+            Ok(path)
+        })
     }
 
     #[must_use]

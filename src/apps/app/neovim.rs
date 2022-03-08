@@ -45,13 +45,13 @@ impl Install<GithubRelease<'_>> for Neovim {
 
     #[cfg(target_os = "macos")]
     fn install(&self) -> Result<Success, Self::Error> {
-        use crate::actions::{Action, Gunzip};
+        use crate::actions::{Action, TarGunzip};
 
         self.logger
             .log_sub_heading_group("install-via-github-release", || {
                 let ghr = GithubRelease::new("neovim", "neovim", "0.6.1", "nvim-macos.tar.gz");
                 let tarball = ghr.download()?;
-                let executable = Gunzip::new(tarball).act()?;
+                let executable = TarGunzip::new(tarball).act()?;
                 std::fs::copy(&executable, "/usr/local/bin/")?;
                 std::fs::remove_file(executable)?;
 

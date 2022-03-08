@@ -2,6 +2,7 @@ use super::PluginManager;
 use crate::{
     install::{method::Git, CommandExists, IdempotentInstall, Install},
     Error, Logger, Success,
+logger
 };
 use git2::Repository;
 use std::{path::PathBuf, process::Command};
@@ -28,11 +29,23 @@ impl Tpm {
         "https://github.com/tmux-plugins/tpm"
     }
 
+    /// Path to `~/.tmux/plugins/tpm`.
+    ///
+    /// # Panics
+    ///
+    /// This panics if there's no home directory for the current user.
+    ///
     #[must_use]
     pub fn root_dir() -> PathBuf {
         dirs::home_dir().unwrap().join(".tmux/plugins/tpm")
     }
 
+    /// Path to `~/.tmux.conf`.
+    ///
+    /// # Panics
+    ///
+    /// This panics if there's no home directory for the current user.
+    ///
     #[must_use]
     pub fn config_file_path() -> PathBuf {
         dirs::home_dir().unwrap().join(".tmux.conf")
@@ -43,7 +56,10 @@ impl CommandExists for Tpm {
     const CMD: &'static str = "";
 
     fn command_exists() -> bool {
-        Self::root_dir().exists() && Self::config_file_path().exists()
+        let result = Self::root_dir().exists() && Self::config_file_path().exists();
+        logger::log_msg("tpm", format!("`tpm` exists? {result}"));
+
+        result
     }
 }
 
@@ -73,7 +89,7 @@ impl IdempotentInstall<Git> for Tpm {}
 impl PluginManager for Tpm {
     const NAME: &'static str = "tpm";
 
-    /// https://github.com/tmux-plugins/tpm/blob/master/docs/managing_plugins_via_cmd_line.mod
+    /// From [managing_plugins_via_cmd_line](https://github.com/tmux-plugins/tpm/blob/master/docs/managing_plugins_via_cmd_line.mod).
     ///
     fn install_all_packages(&self) -> Result<Success, Error> {
         self.logger.log_sub_heading_group("tpm-install", || {

@@ -1,7 +1,7 @@
-pub(crate) mod download;
-pub(crate) mod gunzip;
+pub mod download;
+pub mod tar_gunzip;
 
-pub use self::{download::Download, gunzip::Gunzip};
+pub use self::{download::Download, tar_gunzip::TarGunzip};
 
 pub trait Action {
     type Output;

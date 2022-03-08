@@ -10,8 +10,8 @@
       Maybe then we have `FetchUrl` that implements `Action` and `ItempotentAction`.
     - `Action`'s return value is just the value, whereas `IdempotentAction` returns a `Success`
       that wraps the value.
-- [ ] Logging
+- [x] Logging
   - [x] Instead of having methods for `install()` and `install_with_logging()`, I should just depend on
         Rust's `log` stuff (if it's enabled, log things). As such, consider making my own logger that's
         `log`-aware.
-  - [ ] Add logging for each method that does something.
+  - [x] Add logging for each method that does something.

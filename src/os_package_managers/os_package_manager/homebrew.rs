@@ -63,23 +63,28 @@ impl OsPackageManager for Homebrew {
     // brew bundle --global
     //
     fn install_all_packages(&self) -> Result<Success, super::Error> {
-        let mut child = Command::new("brew").arg("bundle").arg("--global").spawn()?;
-        child.wait()?;
+        self.logger
+            .log_sub_heading_group("install-all-packages", || {
+                let mut child = Command::new("brew").arg("bundle").arg("--global").spawn()?;
+                child.wait()?;
 
-        Ok(Success::DidIt)
+                Ok(Success::DidIt)
+            })
     }
 
     fn install_package<S>(&self, package_name: S) -> Result<Success, super::Error>
     where
         S: AsRef<OsStr>,
     {
-        let mut child = Command::new("brew")
-            .arg("install")
-            .arg(package_name)
-            .spawn()?;
-        child.wait()?;
+        self.logger.log_sub_heading_group("install-pacakge", || {
+            let mut child = Command::new("brew")
+                .arg("install")
+                .arg(package_name)
+                .spawn()?;
+            child.wait()?;
 
-        Ok(Success::DidIt)
+            Ok(Success::DidIt)
+        })
     }
 
     fn install_package_list<I, S>(&self, package_names: I) -> Result<Success, super::Error>
@@ -87,6 +92,8 @@ impl OsPackageManager for Homebrew {
         I: IntoIterator<Item = S>,
         S: AsRef<OsStr>,
     {
+        self.logger
+            .log_sub_heading_group("install-pacakge-list", || {
         let mut child = Command::new("brew")
             .arg("install")
             .args(package_names)
@@ -94,5 +101,6 @@ impl OsPackageManager for Homebrew {
         child.wait()?;
 
         Ok(Success::DidIt)
+            })
     }
 }
