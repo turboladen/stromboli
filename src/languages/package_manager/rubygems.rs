@@ -1,5 +1,5 @@
 use super::PackageManager;
-use crate::{Logger, Success};
+use crate::{actions::Success, Logger};
 use std::process::Command;
 
 #[derive(Debug, Clone, Copy)]
@@ -8,7 +8,7 @@ pub struct Rubygems {
 }
 
 impl PackageManager for Rubygems {
-    fn install_package<S>(&self, package_name: S) -> Result<Success, crate::Error>
+    fn install_package<S>(&self, package_name: S) -> Result<Success<()>, crate::Error>
     where
         S: AsRef<std::ffi::OsStr>,
     {
@@ -19,11 +19,11 @@ impl PackageManager for Rubygems {
                 .spawn()?;
             child.wait()?;
 
-            Ok(Success::DidIt)
+            Ok(Success::DidIt(()))
         })
     }
 
-    fn install_package_list<I, S>(&self, package_names: I) -> Result<Success, crate::Error>
+    fn install_package_list<I, S>(&self, package_names: I) -> Result<Success<()>, crate::Error>
     where
         I: IntoIterator<Item = S>,
         S: AsRef<std::ffi::OsStr>,
@@ -36,7 +36,7 @@ impl PackageManager for Rubygems {
                     .spawn()?;
                 child.wait()?;
 
-                Ok(Success::DidIt)
+                Ok(Success::DidIt(()))
             })
     }
 }

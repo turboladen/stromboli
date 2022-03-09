@@ -1,12 +1,15 @@
 use super::App;
 use crate::{
-    install::{
-        self,
-        method::{remote_shell_script, RemoteShellScript},
-        CommandExists, Install,
+    actions::{
+        install::{
+            self,
+            method::{remote_shell_script, RemoteShellScript},
+            IdempotentInstall, Install,
+        },
+        CommandExists, Success,
     },
     os_package_managers::{os_package_manager, OsPackageManager},
-    Logger, Success,
+    Logger,
 };
 use std::process::Command;
 
@@ -34,9 +37,10 @@ impl<T> Install<T> for Starship
 where
     T: OsPackageManager + install::Method,
 {
+    type Output = Success<()>;
     type Error = os_package_manager::Error;
 
-    fn install(&self) -> Result<Success, Self::Error> {
+    fn install(&self) -> Result<Self::Output, Self::Error> {
         self.logger
             .log_sub_heading_group("install-via-os-package-manager", || {
                 let pkg_manager = T::default();
@@ -46,9 +50,10 @@ where
 }
 
 impl Install<RemoteShellScript> for Starship {
+    type Output = ();
     type Error = remote_shell_script::Error;
 
-    fn install(&self) -> Result<Success, Self::Error> {
+    fn install(&self) -> Result<Self::Output, Self::Error> {
         self.logger
             .log_sub_heading_group("install-via-remote-shell-script", || {
                 let output = Command::new("curl")
@@ -61,7 +66,33 @@ impl Install<RemoteShellScript> for Starship {
                 let mut child = Command::new("sh").arg("-c").arg(stdout).spawn()?;
                 child.wait()?;
 
-                Ok(Success::DidIt)
+                Ok(())
+            })
+    }
+}
+
+impl IdempotentInstall<RemoteShellScript> for Starship {
+    type Output = ();
+    type Error = remote_shell_script::Error;
+
+    fn idempotent_install(&self) -> Result<Success<Self::Output>, Self::Error> {
+        self.logger
+            .log_sub_heading_group("idempotent-install-via-remote-shell-script", || {
+                if Self::command_exists() {
+                    return Ok(Success::AlreadyInstalled(()));
+                }
+
+                let output = Command::new("curl")
+                    .arg("-fsSL")
+                    .arg("https://starship.rs/install.sh")
+                    .output()?;
+
+                // The stdout output is a shell script that needs to be executed.
+                let stdout = std::str::from_utf8(&output.stdout)?;
+                let mut child = Command::new("sh").arg("-c").arg(stdout).spawn()?;
+                child.wait()?;
+
+                Ok(Success::DidIt(()))
             })
     }
 }

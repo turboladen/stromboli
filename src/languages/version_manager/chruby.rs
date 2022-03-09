@@ -1,6 +1,9 @@
 use crate::{
-    install::{method::RemoteShellScript, CommandExists, IdempotentInstall, Install},
-    Logger, Success,
+    actions::{
+        install::{method::RemoteShellScript, IdempotentInstall, Install},
+        CommandExists, Success,
+    },
+    Logger,
 };
 use std::process::Command;
 
@@ -25,9 +28,10 @@ impl CommandExists for Chruby {
 }
 
 impl Install<RemoteShellScript> for Chruby {
+    type Output = ();
     type Error = std::io::Error;
 
-    fn install(&self) -> Result<Success, Self::Error> {
+    fn install(&self) -> Result<Self::Output, Self::Error> {
         self.logger.log_heading_group(|| {
             let mut child = Command::new("wget")
                 .arg("-0")
@@ -55,9 +59,25 @@ impl Install<RemoteShellScript> for Chruby {
                 .spawn()?;
             child.wait()?;
 
-            Ok(Success::DidIt)
+            Ok(())
         })
     }
 }
 
-impl IdempotentInstall<RemoteShellScript> for Chruby {}
+impl IdempotentInstall<RemoteShellScript> for Chruby {
+    type Output = ();
+
+    type Error = std::io::Error;
+
+    fn idempotent_install(&self) -> Result<Success<Self::Output>, Self::Error> {
+        self.logger.log_heading_group(|| {
+            if Self::command_exists() {
+                return Ok(Success::AlreadyInstalled(()));
+            }
+
+            self.install()?;
+
+            Ok(Success::DidIt(()))
+        })
+    }
+}

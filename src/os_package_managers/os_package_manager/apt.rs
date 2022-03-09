@@ -1,7 +1,7 @@
 use super::{Error, OsPackageManager};
 use crate::{
-    install::{self, CommandExists},
-    Logger, Success,
+    actions::{install, CommandExists, Success},
+    Logger,
 };
 use std::{ffi::OsStr, process::Command};
 
@@ -27,15 +27,15 @@ impl CommandExists for Apt {
 impl OsPackageManager for Apt {
     const NAME: &'static str = "apt";
 
-    fn install_all_packages(&self) -> Result<Success, Error> {
+    fn install_all_packages(&self) -> Result<Success<()>, Error> {
         self.logger
             .log_sub_heading_group("install-all-packages", || {
                 self.logger.log_msg("Nothing to do.");
-                Ok(Success::NothingToDo)
+                Ok(Success::NothingToDo(()))
             })
     }
 
-    fn install_package<S>(&self, package_name: S) -> Result<Success, Error>
+    fn install_package<S>(&self, package_name: S) -> Result<Success<()>, Error>
     where
         S: AsRef<OsStr>,
     {
@@ -48,11 +48,11 @@ impl OsPackageManager for Apt {
                 .spawn()?;
             child.wait()?;
 
-            Ok(Success::DidIt)
+            Ok(Success::DidIt(()))
         })
     }
 
-    fn install_package_list<I, S>(&self, package_names: I) -> Result<Success, Error>
+    fn install_package_list<I, S>(&self, package_names: I) -> Result<Success<()>, Error>
     where
         I: IntoIterator<Item = S>,
         S: AsRef<OsStr>,
@@ -67,7 +67,7 @@ impl OsPackageManager for Apt {
                     .spawn()?;
                 child.wait()?;
 
-                Ok(Success::DidIt)
+                Ok(Success::DidIt(()))
             })
     }
 }

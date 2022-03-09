@@ -4,7 +4,7 @@ pub(crate) mod homebrew;
 
 pub use self::{apt::Apt, dpkg::Dpkg, homebrew::Homebrew};
 
-use crate::Success;
+use crate::actions::Success;
 use std::ffi::OsStr;
 
 // nf-oct-package/f487 from https://www.nerdfonts.com/cheat-sheet.
@@ -25,7 +25,7 @@ pub trait OsPackageManager: Default {
     ///
     /// Errors if the package fails to install for any reason.
     ///
-    fn install_package<S>(&self, package_name: S) -> Result<Success, Error>
+    fn install_package<S>(&self, package_name: S) -> Result<Success<()>, Error>
     where
         S: AsRef<OsStr>;
 
@@ -35,12 +35,16 @@ pub trait OsPackageManager: Default {
     ///
     /// Errors if any package fails to install for any reason.
     ///
-    fn install_package_list<I, S>(&self, package_names: I) -> Result<Success, Error>
+    fn install_package_list<I, S>(&self, package_names: I) -> Result<Success<()>, Error>
     where
         I: IntoIterator<Item = S>,
         S: AsRef<OsStr>;
 
     /// Install all of the packages you want.
     ///
-    fn install_all_packages(&self) -> Result<Success, Error>;
+    /// # Errors
+    ///
+    /// Errors if any package fails to install for any reason.
+    ///
+    fn install_all_packages(&self) -> Result<Success<()>, Error>;
 }

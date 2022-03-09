@@ -1,9 +1,12 @@
 use super::App;
 use crate::{
-    actions::download,
-    install::{method::GithubRelease, CommandExists, Install},
+    actions::{
+        download,
+        install::{method::GithubRelease, IdempotentInstall, Install},
+        CommandExists, Success,
+    },
     os_package_managers::os_package_manager,
-    Logger, Success,
+    Logger,
 };
 
 pub const ICON: char = '';
@@ -26,9 +29,10 @@ impl CommandExists for GitDelta {
 }
 
 impl Install<GithubRelease<'_>> for GitDelta {
+    type Output = ();
     type Error = Error;
 
-    fn install(&self) -> Result<Success, Self::Error> {
+    fn install(&self) -> Result<Self::Output, Self::Error> {
         self.logger
             .log_sub_heading_group("install-via-github-release", || {
                 if cfg!(target_os = "linux") {
@@ -50,12 +54,29 @@ impl Install<GithubRelease<'_>> for GitDelta {
                     }
                 }
 
-                Ok(Success::DidIt)
+                Ok(())
             })
     }
 }
 
-impl App for GitDelta {}
+impl IdempotentInstall<GithubRelease<'_>> for GitDelta {
+    type Output = ();
+    type Error = Error;
+
+    fn idempotent_install(&self) -> Result<Success<Self::Output>, Self::Error> {
+        self.logger
+            .log_sub_heading_group("idempotent-install-via-github-release", || {
+                if Self::command_exists() {
+                    self.logger.log_msg("Already installed.");
+                    return Ok(Success::AlreadyInstalled(()));
+                }
+
+                self.install()?;
+
+                Ok(Success::DidIt(()))
+            })
+    }
+}
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -68,3 +89,5 @@ pub enum Error {
     #[error("transparent")]
     IO(#[from] std::io::Error),
 }
+
+impl App for GitDelta {}

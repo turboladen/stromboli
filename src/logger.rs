@@ -48,6 +48,13 @@ impl Logger {
         log_footer(self.subject.bold());
     }
 
+    /// This is a wrapper around `f` that logs a header and footer before and after calling
+    /// `f`, respectively.
+    ///
+    /// # Errors
+    ///
+    /// If `f` errors, this will return that error.
+    ///
     pub fn log_heading_group<F, O, E>(&self, f: F) -> Result<O, E>
     where
         F: FnOnce() -> Result<O, E>,
@@ -59,6 +66,13 @@ impl Logger {
         Ok(o)
     }
 
+    /// This is a wrapper around `f` that logs a sub-header and footer before and after calling
+    /// `f`, respectively.
+    ///
+    /// # Errors
+    ///
+    /// If `f` errors, this will return that error.
+    ///
     pub fn log_sub_heading_group<T, F, O, E>(&self, sub_name: T, f: F) -> Result<O, E>
     where
         T: AsRef<str>,

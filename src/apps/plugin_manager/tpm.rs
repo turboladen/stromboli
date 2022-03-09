@@ -1,8 +1,10 @@
 use super::PluginManager;
 use crate::{
-    install::{method::Git, CommandExists, IdempotentInstall, Install},
-    Error, Logger, Success,
-logger
+    actions::{
+        install::{method::Git, IdempotentInstall, Install},
+        CommandExists, MoreToDo, Success,
+    },
+    logger, Error, Logger,
 };
 use git2::Repository;
 use std::{path::PathBuf, process::Command};
@@ -64,39 +66,66 @@ impl CommandExists for Tpm {
 }
 
 impl Install<Git> for Tpm {
+    type Output = MoreToDo;
     type Error = git2::Error;
 
-    fn install(&self) -> Result<Success, Self::Error> {
+    fn install(&self) -> Result<Self::Output, Self::Error> {
         self.logger.log_sub_heading_group("tpm-install", || {
             let tpm_root_dir = Self::root_dir();
 
             self.logger.log_sub_msg(
                 "tpm-install",
-                format!("Cloning '{}' to '{}'", Self::source_repository(), tpm_root_dir.display()),
+                format!(
+                    "Cloning '{}' to '{}'",
+                    Self::source_repository(),
+                    tpm_root_dir.display()
+                ),
             );
 
             let _repo = Repository::clone(Self::source_repository(), tpm_root_dir)?;
-            let msg = "More to do; check instructions at 'https://github.com/tmux-plugins/tpm#installation'";
-            self.logger.log_sub_msg("tpm-install", msg);
+            self.logger.log_sub_msg("tpm-install", POST_INSTALL_MSG);
 
-            Ok(Success::MoreToDo(msg.to_string()))
+            Ok(MoreToDo(POST_INSTALL_MSG.to_string()))
         })
     }
 }
 
-impl IdempotentInstall<Git> for Tpm {}
+const POST_INSTALL_MSG: &str =
+    "More to do; check instructions at 'https://github.com/tmux-plugins/tpm#installation'";
+
+impl IdempotentInstall<Git> for Tpm {
+    type Output = MoreToDo;
+    type Error = git2::Error;
+
+    fn idempotent_install(&self) -> Result<Success<Self::Output>, Self::Error> {
+        self.logger
+            .log_sub_heading_group("idempotent-tpm-install", || {
+                if Self::command_exists() {
+                    return Ok(Success::AlreadyInstalled(MoreToDo(
+                        POST_INSTALL_MSG.to_string(),
+                    )));
+                }
+
+                let m = self.install()?;
+
+                Ok(Success::DidIt(m))
+            })
+    }
+}
 
 impl PluginManager for Tpm {
+    type Output = ();
+
     const NAME: &'static str = "tpm";
 
     /// From [managing_plugins_via_cmd_line](https://github.com/tmux-plugins/tpm/blob/master/docs/managing_plugins_via_cmd_line.mod).
     ///
-    fn install_all_packages(&self) -> Result<Success, Error> {
+    fn install_all_packages(&self) -> Result<(), Error> {
         self.logger.log_sub_heading_group("tpm-install", || {
             let cmd = Self::root_dir().join("bin/install_plugins");
             let _output = Command::new(cmd).output()?;
 
-            Ok(Success::DidIt)
+            Ok(())
         })
     }
 }

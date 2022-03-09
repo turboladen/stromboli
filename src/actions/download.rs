@@ -1,4 +1,4 @@
-use super::Action;
+use super::{Action, IdempotentAction, Success};
 use crate::Logger;
 use reqwest::Url;
 use std::{
@@ -47,19 +47,44 @@ where
     type Error = Error;
 
     fn act(&self) -> Result<Self::Output, Self::Error> {
-        self.logger.log_sub_heading_group(&self.url, || {
-            let mut response = reqwest::blocking::get(self.url.clone())?;
+        self.logger
+            .log_sub_heading_group(format!("download {}", self.url), || {
+                if self.destination.as_ref().exists() {
+                    todo!("File exists already")
+                } else {
+                    let mut response = reqwest::blocking::get(self.url.clone())?;
+                    let mut file = File::create(&self.destination)?;
+                    let _ = response.copy_to(&mut file)?;
+                };
 
-            let mut file = if self.destination.as_ref().exists() {
-                todo!("File exists already")
-            } else {
-                File::create(&self.destination)?
-            };
+                Ok(self.destination.as_ref().to_path_buf())
+            })
+    }
+}
 
-            let _ = response.copy_to(&mut file)?;
+impl<'a, T> IdempotentAction for Download<'a, T>
+where
+    T: AsRef<Path> + ?Sized,
+{
+    type Output = Success<PathBuf>;
 
-            Ok(self.destination.as_ref().to_path_buf())
-        })
+    type Error = Error;
+
+    fn idempotent_act(&self) -> Result<Self::Output, Self::Error> {
+        self.logger
+            .log_sub_heading_group(format!("idempotent-download {}", self.url), || {
+                if self.destination.as_ref().exists() {
+                    return Ok(Success::AlreadyInstalled(
+                        self.destination.as_ref().to_path_buf(),
+                    ));
+                }
+
+                let mut response = reqwest::blocking::get(self.url.clone())?;
+                let mut file = File::create(&self.destination)?;
+                let _ = response.copy_to(&mut file)?;
+
+                Ok(Success::DidIt(self.destination.as_ref().to_path_buf()))
+            })
     }
 }
 

@@ -1,5 +1,5 @@
 use super::App;
-use crate::{apps::plugin_manager::Tpm, install::CommandExists, NewPluginManager};
+use crate::{actions::CommandExists, apps::plugin_manager::Tpm, NewPluginManager};
 
 // https://www.nerdfonts.com/cheat-sheet: nf-dev-terminal
 pub const ICON: char = '';

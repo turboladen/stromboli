@@ -2,7 +2,7 @@
 
 ## TODO
 
-- [ ] Idempotency
+- [x] Idempotency
   - [x] Make an `Action` trait (or something) that I can with something like an
         `IdempotentAction`.
     - I.e. I have `GitHubRelease::fetch_url()`, but it'd be nice to,
@@ -15,3 +15,5 @@
         Rust's `log` stuff (if it's enabled, log things). As such, consider making my own logger that's
         `log`-aware.
   - [x] Add logging for each method that does something.
+- [ ] Install methods. Types like `Install<RemoteShellScript>` aren't using `RemoteShellScript`
+  methods--fix that.
