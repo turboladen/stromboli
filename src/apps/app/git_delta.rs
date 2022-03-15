@@ -1,4 +1,3 @@
-use super::App;
 use crate::{
     actions::{
         download,
@@ -89,5 +88,3 @@ pub enum Error {
     #[error("transparent")]
     IO(#[from] std::io::Error),
 }
-
-impl App for GitDelta {}

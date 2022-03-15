@@ -18,7 +18,7 @@ impl Default for Apt {
     }
 }
 
-impl install::Method for Apt {}
+// impl install::Method for Apt {}
 
 impl CommandExists for Apt {
     const CMD: &'static str = "apt-get";

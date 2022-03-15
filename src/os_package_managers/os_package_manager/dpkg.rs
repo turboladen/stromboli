@@ -18,7 +18,7 @@ impl Default for Dpkg {
     }
 }
 
-impl install::Method for Dpkg {}
+// impl install::Method for Dpkg {}
 
 impl CommandExists for Dpkg {
     const CMD: &'static str = "dpkg";

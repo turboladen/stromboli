@@ -1,17 +1,15 @@
-use super::App;
 use crate::{
     actions::{
         install::{
             self,
             method::{remote_shell_script, RemoteShellScript},
-            IdempotentInstall, Install,
+            IdempotentInstall, Install, Method,
         },
         CommandExists, Success,
     },
     os_package_managers::{os_package_manager, OsPackageManager},
     Logger,
 };
-use std::process::Command;
 
 pub const ICON: char = '';
 const NAME: &str = "starship";
@@ -56,17 +54,7 @@ impl Install<RemoteShellScript> for Starship {
     fn install(&self) -> Result<Self::Output, Self::Error> {
         self.logger
             .log_sub_heading_group("install-via-remote-shell-script", || {
-                let output = Command::new("curl")
-                    .arg("-fsSL")
-                    .arg("https://starship.rs/install.sh")
-                    .output()?;
-
-                // The stdout output is a shell script that needs to be executed.
-                let stdout = std::str::from_utf8(&output.stdout)?;
-                let mut child = Command::new("sh").arg("-c").arg(stdout).spawn()?;
-                child.wait()?;
-
-                Ok(())
+                RemoteShellScript::try_new("https://starship.rs/install.sh")?.install()
             })
     }
 }
@@ -82,19 +70,10 @@ impl IdempotentInstall<RemoteShellScript> for Starship {
                     return Ok(Success::AlreadyInstalled(()));
                 }
 
-                let output = Command::new("curl")
-                    .arg("-fsSL")
-                    .arg("https://starship.rs/install.sh")
-                    .output()?;
-
-                // The stdout output is a shell script that needs to be executed.
-                let stdout = std::str::from_utf8(&output.stdout)?;
-                let mut child = Command::new("sh").arg("-c").arg(stdout).spawn()?;
-                child.wait()?;
+                self.install()?;
 
                 Ok(Success::DidIt(()))
             })
     }
 }
 
-impl App for Starship {}

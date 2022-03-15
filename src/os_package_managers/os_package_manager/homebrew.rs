@@ -25,7 +25,7 @@ impl Default for Homebrew {
     }
 }
 
-impl install::Method for Homebrew {}
+// impl install::Method for Homebrew {}
 
 impl Install<RemoteShellScript> for Homebrew {
     type Output = ();

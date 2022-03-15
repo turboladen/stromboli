@@ -1,4 +1,3 @@
-use super::App;
 use crate::{
     actions::{
         download,
@@ -89,4 +88,3 @@ impl IdempotentInstall<GithubRelease<'_>> for Neovim {
             })
     }
 }
-impl App for Neovim {}

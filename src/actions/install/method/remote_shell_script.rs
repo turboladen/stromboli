@@ -6,7 +6,13 @@ use crate::{
     Logger,
 };
 use reqwest::{IntoUrl, Url};
-use std::path::PathBuf;
+use std::{
+    ffi::OsStr,
+    path::{PathBuf},
+    process::Command,
+};
+
+use super::Method;
 
 pub const ICON: char = 'ﰌ';
 
@@ -33,6 +39,13 @@ impl RemoteShellScript {
         })
     }
 
+    pub fn exec<T: AsRef<OsStr>>(&self, script: T) -> Result<(), Error> {
+        let mut child = Command::new("bash").arg("-c").arg(script).spawn()?;
+        child.wait()?;
+
+        Ok(())
+    }
+
     #[must_use]
     pub fn script_name_from_url(&self) -> Option<&str> {
         let path_segments = self.url.path_segments()?;
@@ -40,7 +53,15 @@ impl RemoteShellScript {
     }
 }
 
-impl super::Method for RemoteShellScript {}
+impl Method for RemoteShellScript {
+    type Output = ();
+    type Error = Error;
+
+    fn install(&self) -> Result<Self::Output, Self::Error> {
+        let script = self.download()?;
+        self.exec(script)
+    }
+}
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {

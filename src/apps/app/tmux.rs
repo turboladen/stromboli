@@ -1,4 +1,3 @@
-use super::App;
 use crate::{actions::CommandExists, apps::plugin_manager::Tpm, NewPluginManager};
 
 // https://www.nerdfonts.com/cheat-sheet: nf-dev-terminal
@@ -18,5 +17,3 @@ impl NewPluginManager for Tmux {
         Tpm::default()
     }
 }
-
-impl App for Tmux {}
