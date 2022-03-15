@@ -16,4 +16,38 @@
         `log`-aware.
   - [x] Add logging for each method that does something.
 - [ ] Install methods. Types like `Install<RemoteShellScript>` aren't using `RemoteShellScript`
-  methods--fix that.
+      methods--fix that.
+
+- Things that don't get installed:
+  - homebrew
+    - topgrade. And this could get run at the end of the bootstrap process.
+    - bat
+    - lua-language-server
+    - rust-analyzer
+    - vale 
+  - MacOS
+    - Alfred
+    - Slack
+    - Tutanota Desktop
+    - nix
+  - cargo-install things:
+    - zr?? (is this via homebrew?)
+    - wasm-snip
+    - wasm-pack
+    - stylua
+    - shellharden
+    - selene
+    - jless
+    - grcov
+    - cargo-watch
+    - cargo-outdated
+    - cargo-insta
+    - cargo-cache
+    - cargo-bloat
+    - cargo-add
+- Problems
+  - .tmux.conf points to /usr/local/bin/zsh
+  - iTerm color config & font not setup (see yadm docs for hints)
+  - my `init.rs` isn't pulled and built
+- Things I don't want any more
+  - tmuxinator
