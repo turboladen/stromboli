@@ -47,33 +47,33 @@ where
     }
 }
 
-impl Install<RemoteShellScript> for Starship {
-    type Output = ();
-    type Error = remote_shell_script::Error;
+// impl Install<RemoteShellScript> for Starship {
+//     type Output = ();
+//     type Error = remote_shell_script::Error;
 
-    fn install(&self) -> Result<Self::Output, Self::Error> {
-        self.logger
-            .log_sub_heading_group("install-via-remote-shell-script", || {
-                RemoteShellScript::try_new("https://starship.rs/install.sh")?.install()
-            })
-    }
-}
+//     fn install(&self) -> Result<Self::Output, Self::Error> {
+//         self.logger
+//             .log_sub_heading_group("install-via-remote-shell-script", || {
+//                 RemoteShellScript::try_new("https://starship.rs/install.sh")?.install()
+//             })
+//     }
+// }
 
-impl IdempotentInstall<RemoteShellScript> for Starship {
-    type Output = ();
-    type Error = remote_shell_script::Error;
+// impl IdempotentInstall<RemoteShellScript> for Starship {
+//     type Output = ();
+//     type Error = remote_shell_script::Error;
 
-    fn idempotent_install(&self) -> Result<Success<Self::Output>, Self::Error> {
-        self.logger
-            .log_sub_heading_group("idempotent-install-via-remote-shell-script", || {
-                if Self::command_exists() {
-                    return Ok(Success::AlreadyInstalled(()));
-                }
+//     fn idempotent_install(&self) -> Result<Success<Self::Output>, Self::Error> {
+//         self.logger
+//             .log_sub_heading_group("idempotent-install-via-remote-shell-script", || {
+//                 if Self::command_exists() {
+//                     return Ok(Success::AlreadyInstalled(()));
+//                 }
 
-                self.install()?;
+//                 self.install()?;
 
-                Ok(Success::DidIt(()))
-            })
-    }
-}
+//                 Ok(Success::DidIt(()))
+//             })
+//     }
+// }
 

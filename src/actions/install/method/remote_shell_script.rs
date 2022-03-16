@@ -6,12 +6,7 @@ use crate::{
     Logger,
 };
 use reqwest::{IntoUrl, Url};
-use std::{
-    ffi::OsStr,
-    path::{PathBuf},
-    process::Command,
-};
-
+use std::{ffi::OsStr, path::PathBuf, process::Command};
 use super::Method;
 
 pub const ICON: char = 'ﰌ';
@@ -54,13 +49,13 @@ impl RemoteShellScript {
 }
 
 impl Method for RemoteShellScript {
-    type Output = ();
-    type Error = Error;
+    //     type Output = ();
+    //     type Error = Error;
 
-    fn install(&self) -> Result<Self::Output, Self::Error> {
-        let script = self.download()?;
-        self.exec(script)
-    }
+    //     fn install(&self) -> Result<Self::Output, Self::Error> {
+    //         let script = self.download()?;
+    //         self.exec(script)
+    //     }
 }
 
 #[derive(Debug, thiserror::Error)]
