@@ -20,6 +20,7 @@ pub mod apps;
 pub mod languages;
 pub mod logger;
 pub mod os_package_managers;
+pub mod package;
 
 pub(crate) mod error;
 
@@ -30,4 +31,19 @@ pub trait NewPluginManager {
     type PluginManager;
 
     fn new_plugin_manager(&self) -> Self::PluginManager;
+}
+
+#[macro_export]
+macro_rules! info {
+    ($icon:expr, $subject_name:expr, $child:expr, $msg:expr) => {
+        log::info!("[{} {}.{}] {}", $icon, $subject_name, $child, $msg);
+    };
+
+    ($icon:expr, $subject_name:expr, $msg:expr) => {
+        log::info!("[{} {}] {}", $icon, $subject_name, $msg);
+    };
+
+    ($icon:expr, $subject_name:expr) => {
+        log::info!("[{} {}]", $icon, $subject_name);
+    };
 }
