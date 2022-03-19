@@ -1,6 +1,5 @@
 use crate::{
-    actions::Success,
-    package::{InstallPackage, InstallPackageVersion},
+    package::{InstallPackage, InstallPackageList, InstallPackageVersion},
 };
 use std::{ffi::OsStr, process::Command};
 
@@ -10,10 +9,12 @@ pub const ICON: char = '';
 #[derive(Debug, Clone, Copy)]
 pub struct Rubygems;
 
-impl Rubygems {
-    pub fn install_package<S>(package_name: S) -> Result<(), crate::Error>
+impl InstallPackage for Rubygems {
+    type Error = crate::Error;
+
+    fn install_package<P>(package_name: P) -> Result<(), Self::Error>
     where
-        S: AsRef<OsStr>,
+        P: AsRef<OsStr>,
     {
         crate::info!(
             ICON,
@@ -32,11 +33,15 @@ impl Rubygems {
 
         Ok(())
     }
+}
 
-    pub fn install_package_version<S, T>(package_name: S, version: T) -> Result<(), crate::Error>
+impl InstallPackageVersion for Rubygems {
+    type Error = crate::Error;
+
+    fn install_package_version<P, V>(package_name: P, version: V) -> Result<(), Self::Error>
     where
-        S: AsRef<OsStr>,
-        T: AsRef<OsStr>,
+        P: AsRef<OsStr>,
+        V: AsRef<OsStr>,
     {
         crate::info!(
             ICON,
@@ -61,11 +66,15 @@ impl Rubygems {
 
         Ok(())
     }
+}
 
-    pub fn install_package_list<I, S>(package_names: I) -> Result<Success<()>, crate::Error>
+impl InstallPackageList for Rubygems {
+    type Error = crate::Error;
+
+    fn install_package_list<I, P>(package_names: I) -> Result<(), Self::Error>
     where
-        I: IntoIterator<Item = S> + Iterator<Item = S>,
-        S: AsRef<OsStr>,
+        I: Iterator<Item = P> + IntoIterator<Item = P>,
+        P: AsRef<OsStr>,
     {
         let mut package_names = package_names.into_iter();
 
@@ -90,23 +99,7 @@ impl Rubygems {
 
         crate::info!(ICON, "rubygems", "install-package-list", "end");
 
-        Ok(Success::DidIt(()))
-    }
-}
-
-impl InstallPackage for Rubygems {
-    type Error = crate::Error;
-
-    fn install_package(package_name: &OsStr) -> Result<(), Self::Error> {
-        Self::install_package(package_name)
-    }
-}
-
-impl InstallPackageVersion for Rubygems {
-    type Error = crate::Error;
-
-    fn install_package_version(package_name: &OsStr, version: &OsStr) -> Result<(), Self::Error> {
-        Self::install_package_version(package_name, version)
+        Ok(())
     }
 }
 

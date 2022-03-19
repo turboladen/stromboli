@@ -14,7 +14,7 @@ impl<'a> Package<'a> {
     where
         I: InstallPackage,
     {
-        I::install_package(self.name.as_ref())
+        I::install_package(self.name)
     }
 
     /// Get a reference to the package's name.
@@ -39,7 +39,7 @@ impl<'a> PackageWithVersion<'a> {
     where
         I: InstallPackageVersion,
     {
-        I::install_package_version(self.name.as_ref(), self.version.as_ref())
+        I::install_package_version(self.name, self.version)
     }
 }
 
@@ -53,7 +53,9 @@ pub trait InstallPackage {
     ///
     /// Errors depend on the installation method.
     ///
-    fn install_package(package_name: &OsStr) -> Result<(), Self::Error>;
+    fn install_package<P>(package_name: P) -> Result<(), Self::Error>
+    where
+        P: AsRef<OsStr>;
 }
 
 pub trait InstallPackageVersion {
@@ -66,5 +68,24 @@ pub trait InstallPackageVersion {
     ///
     /// Errors depend on the installation method.
     ///
-    fn install_package_version(package_name: &OsStr, version: &OsStr) -> Result<(), Self::Error>;
+    fn install_package_version<P, V>(package_name: P, version: V) -> Result<(), Self::Error>
+    where
+        P: AsRef<OsStr>,
+        V: AsRef<OsStr>;
+}
+
+pub trait InstallPackageList {
+    /// Each installation type can fail for reasons that are specific to it; this allows for
+    /// specifying errors that make sense in that context.
+    ///
+    type Error;
+
+    /// # Errors
+    ///
+    /// Errors depend on the installation method.
+    ///
+    fn install_package_list<I, P>(package_names: I) -> Result<(), Self::Error>
+    where
+        I: Iterator<Item = P> + IntoIterator<Item = P>,
+        P: AsRef<OsStr>;
 }
