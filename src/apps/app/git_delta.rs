@@ -5,7 +5,7 @@ use crate::{
         CommandExists, Success,
     },
     os_package_managers::os_package_manager,
-    Logger,
+    Logger, package::InstallPackage,
 };
 
 pub const ICON: char = '';
@@ -35,7 +35,7 @@ impl Install<GithubRelease<'_>> for GitDelta {
         self.logger
             .log_sub_heading_group("install-via-github-release", || {
                 if cfg!(target_os = "linux") {
-                    use crate::os_package_managers::{os_package_manager::Dpkg, OsPackageManager};
+                    use crate::os_package_managers::os_package_manager::Dpkg;
 
                     if Dpkg::command_exists() {
                         let deb_path = GithubRelease::new(
@@ -46,7 +46,7 @@ impl Install<GithubRelease<'_>> for GitDelta {
                         )
                         .download()?;
 
-                        Dpkg::default().install_package(&deb_path)?;
+                        Dpkg::install_package(&deb_path)?;
                         std::fs::remove_file(deb_path)?;
                     } else {
                         todo!()

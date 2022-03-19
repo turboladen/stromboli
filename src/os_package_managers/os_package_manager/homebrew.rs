@@ -21,6 +21,7 @@ impl Homebrew {
         Ok(())
     }
 }
+
 //impl Install<RemoteShellScript> for Homebrew {
 //    type Output = ();
 //    type Error = InstallError;
