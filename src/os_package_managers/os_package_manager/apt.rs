@@ -1,73 +1,78 @@
-use super::{Error, OsPackageManager};
+use super::{Error, };
 use crate::{
-    actions::{install, CommandExists, Success},
-    Logger,
+    actions::{CommandExists, },
+    package::{InstallPackage, InstallPackageList},
 };
 use std::{ffi::OsStr, process::Command};
 
 #[derive(Debug, Clone, Copy)]
-pub struct Apt {
-    logger: Logger,
-}
-
-impl Default for Apt {
-    fn default() -> Self {
-        Self {
-            logger: Logger::new(super::ICON, Self::NAME),
-        }
-    }
-}
-
-// impl install::Method for Apt {}
+pub struct Apt;
 
 impl CommandExists for Apt {
     const CMD: &'static str = "apt-get";
 }
 
-impl OsPackageManager for Apt {
-    const NAME: &'static str = "apt";
+impl InstallPackage for Apt {
+    type Error = Error;
 
-    fn install_all_packages(&self) -> Result<Success<()>, Error> {
-        self.logger
-            .log_sub_heading_group("install-all-packages", || {
-                self.logger.log_msg("Nothing to do.");
-                Ok(Success::NothingToDo(()))
-            })
-    }
-
-    fn install_package<S>(&self, package_name: S) -> Result<Success<()>, Error>
+    fn install_package<P>(package_name: P) -> Result<(), Self::Error>
     where
-        S: AsRef<OsStr>,
+        P: AsRef<OsStr>,
     {
-        self.logger.log_sub_heading_group("install-pacakge", || {
-            let mut child = Command::new("sudo")
-                .arg("apt-get")
-                .arg("install")
-                .arg("-y")
-                .arg(package_name)
-                .spawn()?;
-            child.wait()?;
+        crate::info!(
+            super::ICON,
+            "dpkg",
+            "install-package",
+            format!("start: '{}'", package_name.as_ref().to_string_lossy())
+        );
 
-            Ok(Success::DidIt(()))
-        })
+        let mut child = Command::new("sudo")
+            .arg("apt-get")
+            .arg("install")
+            .arg("-y")
+            .arg(package_name)
+            .spawn()?;
+        child.wait()?;
+
+        crate::info!(super::ICON, "apt", "install-package", "end");
+
+        Ok(())
     }
+}
 
-    fn install_package_list<I, S>(&self, package_names: I) -> Result<Success<()>, Error>
+impl InstallPackageList for Apt {
+    type Error = Error;
+
+    fn install_package_list<I, P>(package_names: I) -> Result<(), Error>
     where
-        I: IntoIterator<Item = S>,
-        S: AsRef<OsStr>,
+        I: Iterator<Item = P> + IntoIterator<Item = P>,
+        P: AsRef<OsStr>,
     {
-        self.logger
-            .log_sub_heading_group("install-pacakge-list", || {
-                let mut child = Command::new("sudo")
-                    .arg("apt-get")
-                    .arg("install")
-                    .arg("-y")
-                    .args(package_names)
-                    .spawn()?;
-                child.wait()?;
+        let mut package_names = package_names.into_iter();
 
-                Ok(Success::DidIt(()))
-            })
+        crate::info!(
+            super::ICON,
+            "apt",
+            "install-package-list",
+            format!(
+                "start: '{}'",
+                package_names
+                    .by_ref()
+                    .map(|p| p.as_ref().to_string_lossy().into_owned())
+                    .collect::<String>(),
+            )
+        );
+
+        let mut child = Command::new("sudo")
+            .arg("apt-get")
+            .arg("install")
+            .arg("-y")
+            .args(package_names)
+            .spawn()?;
+        child.wait()?;
+
+        crate::info!(super::ICON, "apt", "install-package-list", "end");
+
+        Ok(())
     }
 }

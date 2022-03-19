@@ -34,7 +34,7 @@ impl InstallPackage for Dpkg {
             .spawn()?;
         child.wait()?;
 
-        crate::info!(super::ICON, "homebrew", "install-package", "end");
+        crate::info!(super::ICON, "dpkg", "install-package", "end");
 
         Ok(())
     }
@@ -52,7 +52,7 @@ impl InstallPackageList for Dpkg {
 
         crate::info!(
             super::ICON,
-            "homebrew",
+            "dpkg",
             "install-package-list",
             format!(
                 "start: '{}'",
@@ -67,7 +67,7 @@ impl InstallPackageList for Dpkg {
             Self::install_package(package_name)?;
         }
 
-        crate::info!(super::ICON, "homebrew", "install-package-list", "end");
+        crate::info!(super::ICON, "dpkg", "install-package-list", "end");
 
         Ok(())
     }
