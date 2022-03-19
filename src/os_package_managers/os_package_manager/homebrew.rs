@@ -1,132 +1,139 @@
-use super::OsPackageManager;
 use crate::{
-    actions::{
-        install::{
-            self,
-            method::{remote_shell_script, RemoteShellScript},
-            IdempotentInstall, Install,
-        },
-        CommandExists, Success,
-    },
-    Logger,
+    actions::{CommandExists, },
+    package::{InstallPackage, InstallPackageList},
 };
 use std::{ffi::OsStr, process::Command};
 
 #[derive(Debug, Clone, Copy)]
-pub struct Homebrew {
-    logger: Logger,
-}
+pub struct Homebrew;
 
-impl Default for Homebrew {
-    fn default() -> Self {
-        Self {
-            logger: Logger::new(super::ICON, "homebrew"),
-        }
-    }
-}
-
-// impl install::Method for Homebrew {}
-
-impl Install<RemoteShellScript> for Homebrew {
-    type Output = ();
-    type Error = InstallError;
-
-    // `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+impl Homebrew {
+    // brew bundle --global
     //
-    fn install(&self) -> Result<Self::Output, Self::Error> {
-        self.logger.log_heading_group(|| {
-            let script_path = RemoteShellScript::try_new(
-                "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh",
-            )
-            .unwrap()
-            .download()?;
+    pub fn install_all_packages(&self) -> Result<(), super::Error> {
+        crate::info!(super::ICON, "homebrew", "install-all-packages", "start");
 
-            let mut child = Command::new("bash").arg("-c").arg(script_path).spawn()?;
-            child.wait()?;
+        let mut child = Command::new("brew").arg("bundle").arg("--global").spawn()?;
+        child.wait()?;
 
-            Ok(())
-        })
+        crate::info!(super::ICON, "homebrew", "install-all-packages", "end");
+
+        Ok(())
     }
 }
+//impl Install<RemoteShellScript> for Homebrew {
+//    type Output = ();
+//    type Error = InstallError;
 
-#[derive(Debug, thiserror::Error)]
-pub enum InstallError {
-    #[error("transparent")]
-    RemoteShellScript(#[from] remote_shell_script::Error),
+//    // `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+//    //
+//    fn install(&self) -> Result<Self::Output, Self::Error> {
+//        self.logger.log_heading_group(|| {
+//            let script_path = RemoteShellScript::try_new(
+//                "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh",
+//            )
+//            .unwrap()
+//            .download()?;
 
-    #[error("transparent")]
-    IO(#[from] std::io::Error),
+//            let mut child = Command::new("bash").arg("-c").arg(script_path).spawn()?;
+//            child.wait()?;
 
-    #[error("transparent")]
-    Utf8(#[from] std::str::Utf8Error),
-}
+//            Ok(())
+//        })
+//    }
+//}
 
-impl IdempotentInstall<RemoteShellScript> for Homebrew {
-    type Output = ();
+//#[derive(Debug, thiserror::Error)]
+//pub enum InstallError {
+//    #[error("transparent")]
+//    RemoteShellScript(#[from] remote_shell_script::Error),
 
-    type Error = InstallError;
+//    #[error("transparent")]
+//    IO(#[from] std::io::Error),
 
-    fn idempotent_install(&self) -> Result<Success<Self::Output>, Self::Error> {
-        self.logger.log_heading_group(|| {
-            if Self::command_exists() {
-                return Ok(Success::AlreadyInstalled(()));
-            }
+//    #[error("transparent")]
+//    Utf8(#[from] std::str::Utf8Error),
+//}
 
-            self.install()?;
+// impl IdempotentInstall<RemoteShellScript> for Homebrew {
+//     type Output = ();
 
-            Ok(Success::DidIt(()))
-        })
-    }
-}
+//     type Error = InstallError;
+
+//     fn idempotent_install(&self) -> Result<Success<Self::Output>, Self::Error> {
+//         self.logger.log_heading_group(|| {
+//             if Self::command_exists() {
+//                 return Ok(Success::AlreadyInstalled(()));
+//             }
+
+//             self.install()?;
+
+//             Ok(Success::DidIt(()))
+//         })
+//     }
+// }
 
 impl CommandExists for Homebrew {
     const CMD: &'static str = "brew";
 }
 
-impl OsPackageManager for Homebrew {
-    const NAME: &'static str = "homebrew";
+impl InstallPackage for Homebrew {
+    type Error = super::Error;
 
-    // brew bundle --global
-    //
-    fn install_all_packages(&self) -> Result<Success<()>, super::Error> {
-        self.logger
-            .log_sub_heading_group("install-all-packages", || {
-                let mut child = Command::new("brew").arg("bundle").arg("--global").spawn()?;
-                child.wait()?;
-
-                Ok(Success::DidIt(()))
-            })
-    }
-
-    fn install_package<S>(&self, package_name: S) -> Result<Success<()>, super::Error>
+    fn install_package<P>(package_name: P) -> Result<(), Self::Error>
     where
-        S: AsRef<OsStr>,
+        P: AsRef<OsStr>,
     {
-        self.logger.log_sub_heading_group("install-pacakge", || {
-            let mut child = Command::new("brew")
-                .arg("install")
-                .arg(package_name)
-                .spawn()?;
-            child.wait()?;
+        crate::info!(
+            super::ICON,
+            "homebrew",
+            "install-package",
+            format!("start: '{}'", package_name.as_ref().to_string_lossy())
+        );
 
-            Ok(Success::DidIt(()))
-        })
+        let mut child = Command::new("brew")
+            .arg("install")
+            .arg(package_name)
+            .spawn()?;
+        child.wait()?;
+
+        crate::info!(super::ICON, "homebrew", "install-package", "end");
+
+        Ok(())
     }
+}
 
-    fn install_package_list<I, S>(&self, package_names: I) -> Result<Success<()>, super::Error>
+impl InstallPackageList for Homebrew {
+    type Error = super::Error;
+
+    fn install_package_list<I, P>(package_names: I) -> Result<(), Self::Error>
     where
-        I: IntoIterator<Item = S>,
-        S: AsRef<OsStr>,
+        I: Iterator<Item = P> + IntoIterator<Item = P>,
+        P: AsRef<OsStr>,
     {
-        self.logger
-            .log_sub_heading_group("install-pacakge-list", || {
-                let mut child = Command::new("brew")
-                    .arg("install")
-                    .args(package_names)
-                    .spawn()?;
-                child.wait()?;
+        let mut package_names = package_names.into_iter();
 
-                Ok(Success::DidIt(()))
-            })
+        crate::info!(
+            super::ICON,
+            "homebrew",
+            "install-package-list",
+            format!(
+                "start: '{}'",
+                package_names
+                    .by_ref()
+                    .map(|p| p.as_ref().to_string_lossy().into_owned())
+                    .collect::<String>(),
+            )
+        );
+
+        let mut child = Command::new("brew")
+            .arg("install")
+            .args(package_names)
+            .spawn()?;
+        child.wait()?;
+
+        crate::info!(super::ICON, "homebrew", "install-package-list", "end");
+
+        Ok(())
     }
 }
