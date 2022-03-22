@@ -9,18 +9,18 @@ use std::{
 /// nf-mdi-download
 pub const ICON: char = '';
 
-pub struct Download<'a, T>
+pub struct Download<T>
 where
     T: AsRef<Path> + ?Sized,
 {
     url: Url,
     logger: Logger,
-    destination: &'a T,
+    destination: T,
 }
 
-impl<'a, T> Download<'a, T>
+impl<T> Download<T>
 where
-    T: AsRef<Path> + ?Sized,
+    T: AsRef<Path>,
 {
     /// Constructor
     ///
@@ -28,7 +28,7 @@ where
     ///
     /// If `url` isn't a valid URL, this will panic.
     ///
-    pub fn new<U: reqwest::IntoUrl>(url: U, destination: &'a T) -> Self {
+    pub fn new<U: reqwest::IntoUrl>(url: U, destination: T) -> Self {
         Self {
             url: url.into_url().unwrap(),
             logger: Logger::new(ICON, "download"),
@@ -37,7 +37,7 @@ where
     }
 }
 
-impl<'a, T> Action for Download<'a, T>
+impl<T> Action for Download<T>
 where
     T: AsRef<Path> + ?Sized,
 {
@@ -62,7 +62,7 @@ where
     }
 }
 
-impl<'a, T> IdempotentAction for Download<'a, T>
+impl<T> IdempotentAction for Download<T>
 where
     T: AsRef<Path> + ?Sized,
 {

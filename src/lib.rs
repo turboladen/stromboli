@@ -1,9 +1,9 @@
 #![deny(unused_extern_crates)]
 #![warn(
     box_pointers,
-    clippy::all,
-    clippy::nursery,
-    clippy::pedantic,
+    // clippy::all,
+    // clippy::nursery,
+    // clippy::pedantic,
     future_incompatible,
     missing_copy_implementations,
     // missing_docs,
@@ -12,15 +12,15 @@
     trivial_casts,
     trivial_numeric_casts,
     unreachable_pub,
-    unused_qualifications
+    // unused_qualifications
 )]
 
 pub mod actions;
 pub mod apps;
 pub mod languages;
 pub mod logger;
-pub mod os_package_managers;
 pub mod package;
+pub mod package_manager;
 
 pub(crate) mod error;
 

@@ -1,6 +1,6 @@
-use super::{Error, };
+use super::Error;
 use crate::{
-    actions::{CommandExists, },
+    actions::CommandExists,
     package::{InstallPackage, InstallPackageList},
 };
 use std::{ffi::OsStr, process::Command};

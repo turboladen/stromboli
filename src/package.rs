@@ -1,4 +1,4 @@
-use std::ffi::OsStr;
+use std::{ffi::OsStr, path::Path};
 
 pub struct Package<'a> {
     name: &'a str,
@@ -41,6 +41,15 @@ impl<'a> PackageWithVersion<'a> {
     {
         I::install_package_version(self.name, self.version)
     }
+}
+
+pub trait FetchPackage {
+    type Error;
+
+    fn fetch_package<P, D>(package_name: P, destination: D) -> Result<(), Self::Error>
+    where
+        P: AsRef<OsStr>,
+        D: AsRef<Path>;
 }
 
 pub trait InstallPackage {
