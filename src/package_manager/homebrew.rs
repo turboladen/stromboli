@@ -81,11 +81,10 @@ impl CommandExists for Homebrew {
 impl InstallPackage for Homebrew {
     type Error = super::Error;
 
-    fn install_package<P, A, T>(package_name: P, args: A) -> Result<(), Self::Error>
+    fn install_package<P, A>(package_name: P, args: &[A]) -> Result<(), Self::Error>
     where
         P: AsRef<OsStr>,
-        A: IntoIterator<Item = T>,
-        T: AsRef<OsStr>,
+        A: AsRef<OsStr>,
     {
         crate::info!(
             super::ICON,

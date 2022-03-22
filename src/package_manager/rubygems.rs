@@ -10,11 +10,10 @@ pub struct Rubygems;
 impl InstallPackage for Rubygems {
     type Error = crate::Error;
 
-    fn install_package<P, A, I>(package_name: P, args: A) -> Result<(), Self::Error>
+    fn install_package<P, A>(package_name: P, args: &[A]) -> Result<(), Self::Error>
     where
         P: AsRef<OsStr>,
-        A: IntoIterator<Item = I>,
-        I: AsRef<OsStr>,
+        A: AsRef<OsStr>,
     {
         crate::info!(
             ICON,
@@ -39,16 +38,15 @@ impl InstallPackage for Rubygems {
 impl InstallPackageVersion for Rubygems {
     type Error = crate::Error;
 
-    fn install_package_version<P, V, A, T>(
+    fn install_package_version<P, V, A>(
         package_name: P,
         version: V,
-        args: A,
+        args: &[A],
     ) -> Result<(), Self::Error>
     where
         P: AsRef<OsStr>,
         V: AsRef<OsStr>,
-        A: IntoIterator<Item = T>,
-        T: AsRef<OsStr>,
+        A: AsRef<OsStr>,
     {
         crate::info!(
             ICON,
@@ -121,12 +119,12 @@ mod tests {
     #[test]
     fn install_package_test() {
         let package = Package::new("rubocop");
-        package.install::<Rubygems>().unwrap();
+        package.install::<Rubygems>(&[]).unwrap();
     }
 
     #[test]
     fn install_package_version_test() {
         let package = PackageWithVersion::new("rubocop", "1.25.0");
-        package.install::<Rubygems>().unwrap();
+        package.install::<Rubygems>(&[]).unwrap();
     }
 }

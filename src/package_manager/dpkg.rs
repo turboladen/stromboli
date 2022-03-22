@@ -15,10 +15,9 @@ impl CommandExists for Dpkg {
 impl InstallPackage for Dpkg {
     type Error = Error;
 
-    fn install_package<P, I, A>(package_name: P, args: I) -> Result<(), Self::Error>
+    fn install_package<P, A>(package_name: P, args: &[A]) -> Result<(), Self::Error>
     where
         P: AsRef<OsStr>,
-        I: IntoIterator<Item = A>,
         A: AsRef<OsStr>,
     {
         crate::info!(
