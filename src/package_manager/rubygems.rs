@@ -1,6 +1,4 @@
-use crate::{
-    package::{InstallPackage, InstallPackageList, InstallPackageVersion},
-};
+use crate::package::{InstallPackage, InstallPackageList, InstallPackageVersion};
 use std::{ffi::OsStr, process::Command};
 
 // https://www.nerdfonts.com/cheat-sheet: nf-oct-ruby
@@ -12,9 +10,11 @@ pub struct Rubygems;
 impl InstallPackage for Rubygems {
     type Error = crate::Error;
 
-    fn install_package<P>(package_name: P) -> Result<(), Self::Error>
+    fn install_package<P, A, I>(package_name: P, args: A) -> Result<(), Self::Error>
     where
         P: AsRef<OsStr>,
+        A: IntoIterator<Item = I>,
+        I: AsRef<OsStr>,
     {
         crate::info!(
             ICON,
@@ -25,6 +25,7 @@ impl InstallPackage for Rubygems {
 
         let mut child = Command::new("gem")
             .arg("install")
+            .args(args)
             .arg(package_name)
             .spawn()?;
         child.wait()?;
@@ -38,10 +39,16 @@ impl InstallPackage for Rubygems {
 impl InstallPackageVersion for Rubygems {
     type Error = crate::Error;
 
-    fn install_package_version<P, V>(package_name: P, version: V) -> Result<(), Self::Error>
+    fn install_package_version<P, V, A, T>(
+        package_name: P,
+        version: V,
+        args: A,
+    ) -> Result<(), Self::Error>
     where
         P: AsRef<OsStr>,
         V: AsRef<OsStr>,
+        A: IntoIterator<Item = T>,
+        T: AsRef<OsStr>,
     {
         crate::info!(
             ICON,
@@ -58,6 +65,7 @@ impl InstallPackageVersion for Rubygems {
             .arg("install")
             .arg("--version")
             .arg(version)
+            .args(args)
             .arg(package_name)
             .spawn()?;
         child.wait()?;
@@ -71,10 +79,11 @@ impl InstallPackageVersion for Rubygems {
 impl InstallPackageList for Rubygems {
     type Error = crate::Error;
 
-    fn install_package_list<I, P>(package_names: I) -> Result<(), Self::Error>
+    fn install_package_list<P, T, A>(package_names: P, args: &[A]) -> Result<(), Self::Error>
     where
-        I: Iterator<Item = P> + IntoIterator<Item = P>,
-        P: AsRef<OsStr>,
+        P: Iterator<Item = T> + IntoIterator<Item = T>,
+        T: AsRef<OsStr>,
+        A: AsRef<OsStr>,
     {
         let mut package_names = package_names.into_iter();
 
@@ -93,6 +102,7 @@ impl InstallPackageList for Rubygems {
 
         let mut child = Command::new("gem")
             .arg("install")
+            .args(args)
             .args(package_names)
             .spawn()?;
         child.wait()?;

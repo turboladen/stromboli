@@ -1,5 +1,5 @@
 use crate::{
-    actions::{CommandExists, },
+    actions::CommandExists,
     package::{InstallPackage, InstallPackageList},
 };
 use std::{ffi::OsStr, process::Command};
@@ -81,9 +81,11 @@ impl CommandExists for Homebrew {
 impl InstallPackage for Homebrew {
     type Error = super::Error;
 
-    fn install_package<P>(package_name: P) -> Result<(), Self::Error>
+    fn install_package<P, A, T>(package_name: P, args: A) -> Result<(), Self::Error>
     where
         P: AsRef<OsStr>,
+        A: IntoIterator<Item = T>,
+        T: AsRef<OsStr>,
     {
         crate::info!(
             super::ICON,
@@ -94,6 +96,7 @@ impl InstallPackage for Homebrew {
 
         let mut child = Command::new("brew")
             .arg("install")
+            .args(args)
             .arg(package_name)
             .spawn()?;
         child.wait()?;
@@ -107,10 +110,11 @@ impl InstallPackage for Homebrew {
 impl InstallPackageList for Homebrew {
     type Error = super::Error;
 
-    fn install_package_list<I, P>(package_names: I) -> Result<(), Self::Error>
+    fn install_package_list<P, T, A>(package_names: P, args: &[A]) -> Result<(), Self::Error>
     where
-        I: Iterator<Item = P> + IntoIterator<Item = P>,
-        P: AsRef<OsStr>,
+        P: Iterator<Item = T> + IntoIterator<Item = T>,
+        T: AsRef<OsStr>,
+        A: AsRef<OsStr>,
     {
         let mut package_names = package_names.into_iter();
 
@@ -129,6 +133,7 @@ impl InstallPackageList for Homebrew {
 
         let mut child = Command::new("brew")
             .arg("install")
+            .args(args)
             .args(package_names)
             .spawn()?;
         child.wait()?;

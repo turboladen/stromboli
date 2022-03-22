@@ -15,9 +15,11 @@ impl CommandExists for Apt {
 impl InstallPackage for Apt {
     type Error = Error;
 
-    fn install_package<P>(package_name: P) -> Result<(), Self::Error>
+    fn install_package<P, I, A>(package_name: P, args: I) -> Result<(), Self::Error>
     where
         P: AsRef<OsStr>,
+        I: IntoIterator<Item = A>,
+        A: AsRef<OsStr>,
     {
         crate::info!(
             super::ICON,
@@ -30,6 +32,7 @@ impl InstallPackage for Apt {
             .arg("apt-get")
             .arg("install")
             .arg("-y")
+            .args(args)
             .arg(package_name)
             .spawn()?;
         child.wait()?;
@@ -43,10 +46,11 @@ impl InstallPackage for Apt {
 impl InstallPackageList for Apt {
     type Error = Error;
 
-    fn install_package_list<I, P>(package_names: I) -> Result<(), Error>
+    fn install_package_list<P, T, A>(package_names: P, args: &[A]) -> Result<(), Error>
     where
-        I: Iterator<Item = P> + IntoIterator<Item = P>,
-        P: AsRef<OsStr>,
+        P: Iterator<Item = T> + IntoIterator<Item = T>,
+        T: AsRef<OsStr>,
+        A: AsRef<OsStr>,
     {
         let mut package_names = package_names.into_iter();
 
@@ -67,6 +71,7 @@ impl InstallPackageList for Apt {
             .arg("apt-get")
             .arg("install")
             .arg("-y")
+            .args(args)
             .args(package_names)
             .spawn()?;
         child.wait()?;

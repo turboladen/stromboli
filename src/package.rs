@@ -10,11 +10,13 @@ impl<'a> Package<'a> {
         Self { name }
     }
 
-    pub fn install<I>(&self) -> Result<(), I::Error>
+    pub fn install<I, A, T>(&self, args: A) -> Result<(), I::Error>
     where
         I: InstallPackage,
+        A: IntoIterator<Item = T>,
+        T: AsRef<OsStr>,
     {
-        I::install_package(self.name)
+        I::install_package::<&'a str, A, T>(self.name, args)
     }
 
     /// Get a reference to the package's name.
@@ -35,11 +37,13 @@ impl<'a> PackageWithVersion<'a> {
         Self { name, version }
     }
 
-    pub fn install<I>(&self) -> Result<(), I::Error>
+    pub fn install<I, A, T>(&self, args: A) -> Result<(), I::Error>
     where
         I: InstallPackageVersion,
+        A: IntoIterator<Item = T>,
+        T: AsRef<OsStr>,
     {
-        I::install_package_version(self.name, self.version)
+        I::install_package_version::<&'a str, &'a str, A, T>(self.name, self.version, args)
     }
 }
 
@@ -62,9 +66,11 @@ pub trait InstallPackage {
     ///
     /// Errors depend on the installation method.
     ///
-    fn install_package<P>(package_name: P) -> Result<(), Self::Error>
+    fn install_package<P, A, T>(package_name: P, args: A) -> Result<(), Self::Error>
     where
-        P: AsRef<OsStr>;
+        P: AsRef<OsStr>,
+        A: IntoIterator<Item = T>,
+        T: AsRef<OsStr>;
 }
 
 pub trait InstallPackageVersion {
@@ -77,10 +83,16 @@ pub trait InstallPackageVersion {
     ///
     /// Errors depend on the installation method.
     ///
-    fn install_package_version<P, V>(package_name: P, version: V) -> Result<(), Self::Error>
+    fn install_package_version<P, V, A, T>(
+        package_name: P,
+        version: V,
+        args: A,
+    ) -> Result<(), Self::Error>
     where
         P: AsRef<OsStr>,
-        V: AsRef<OsStr>;
+        V: AsRef<OsStr>,
+        A: IntoIterator<Item = T>,
+        T: AsRef<OsStr>;
 }
 
 pub trait InstallPackageList {
@@ -93,8 +105,9 @@ pub trait InstallPackageList {
     ///
     /// Errors depend on the installation method.
     ///
-    fn install_package_list<I, P>(package_names: I) -> Result<(), Self::Error>
+    fn install_package_list<P, T, A>(package_names: P, args: &[A]) -> Result<(), Self::Error>
     where
-        I: Iterator<Item = P> + IntoIterator<Item = P>,
-        P: AsRef<OsStr>;
+        P: Iterator<Item = T> + IntoIterator<Item = T>,
+        T: AsRef<OsStr>,
+        A: AsRef<OsStr>;
 }

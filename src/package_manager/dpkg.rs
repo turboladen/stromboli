@@ -15,9 +15,11 @@ impl CommandExists for Dpkg {
 impl InstallPackage for Dpkg {
     type Error = Error;
 
-    fn install_package<P>(package_name: P) -> Result<(), Self::Error>
+    fn install_package<P, I, A>(package_name: P, args: I) -> Result<(), Self::Error>
     where
         P: AsRef<OsStr>,
+        I: IntoIterator<Item = A>,
+        A: AsRef<OsStr>,
     {
         crate::info!(
             super::ICON,
@@ -30,6 +32,7 @@ impl InstallPackage for Dpkg {
             .arg("dpkg")
             .arg("--install")
             .arg("--refuse-downgrade")
+            .args(args)
             .arg(package_name)
             .spawn()?;
         child.wait()?;
@@ -43,10 +46,11 @@ impl InstallPackage for Dpkg {
 impl InstallPackageList for Dpkg {
     type Error = Error;
 
-    fn install_package_list<I, P>(package_names: I) -> Result<(), Self::Error>
+    fn install_package_list<P, T, A>(package_names: P, args: &[A]) -> Result<(), Self::Error>
     where
-        I: Iterator<Item = P> + IntoIterator<Item = P>,
-        P: AsRef<OsStr>,
+        P: Iterator<Item = T> + IntoIterator<Item = T>,
+        T: AsRef<OsStr>,
+        A: AsRef<OsStr>,
     {
         let mut package_names = package_names.into_iter();
 
@@ -64,7 +68,7 @@ impl InstallPackageList for Dpkg {
         );
 
         for package_name in package_names {
-            Self::install_package(package_name)?;
+            Self::install_package(package_name, args.clone())?;
         }
 
         crate::info!(super::ICON, "dpkg", "install-package-list", "end");
